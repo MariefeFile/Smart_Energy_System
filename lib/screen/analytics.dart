@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:smartenergy_app/screen/explore.dart';
 import 'package:smartenergy_app/screen/admin_home.dart';
 import 'package:smartenergy_app/main.dart'; // For AnimatedBackground & BackgroundShapes
 
@@ -123,39 +124,51 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.black.withAlpha((255 * 0.4).toInt()),
-        currentIndex: 2,
-        onTap: (index) {
-          if (index == 2) return;
+  type: BottomNavigationBarType.fixed,
+  selectedItemColor: Colors.teal,
+  unselectedItemColor: Colors.grey,
+  backgroundColor: Colors.black.withAlpha((255 * 0.4).toInt()),
+  currentIndex: 2, // Analytics
+  onTap: (index) {
+    if (index == 2) return; // Already on Analytics
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomeScreen(initialIndex: index),
-            ),
-          );
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.show_chart),
-            label: 'Analytics',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
-            label: 'Schedule',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-      ),
+    Widget page;
+
+    switch (index) {
+      case 0:
+        page = const HomeScreen();
+        break;
+      case 1:
+        page = const ExploreTab();
+        break;
+      case 3:
+        // page = const ScheduleScreen();
+        return;
+      case 4:
+        // page = const SettingsScreen();
+        return;
+      case 5:
+        // page = const ProfileScreen();
+        return;
+      default:
+        page = const HomeScreen();
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => page),
+    );
+  },
+  items: const [
+    BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
+    BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
+    BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
+    BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
+    BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+    BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+  ],
+),
+
     );
   }
 

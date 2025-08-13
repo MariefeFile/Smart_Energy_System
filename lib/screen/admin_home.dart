@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'analytics.dart';
+import 'explore.dart'; 
 import '../main.dart'; // Assuming AnimatedBackground & BackgroundShapes are in main.dart
 
 class HomeScreen extends StatefulWidget {
@@ -113,8 +114,13 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.black.withAlpha((255 * 0.4).toInt()),
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
-      onTap: (index) {
-        if (index == 2) {
+       onTap: (index) {
+        if (index == 1) {
+          Navigator.pushReplacement(
+            context,
+           MaterialPageRoute(builder: (_) => ExploreTab())
+          );
+        } else if (index == 2) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const AnalyticsScreen()),
