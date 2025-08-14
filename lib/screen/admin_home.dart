@@ -242,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Solar Production',
+            'Montly Consumption',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
@@ -262,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Sunlight hours: 5.2 hrs',
+            'Consume hours: 5.2 hrs',
             style: TextStyle(fontSize: 12, color: Colors.black54),
           ),
         ],
