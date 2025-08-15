@@ -80,7 +80,7 @@ class EnergyMenuScreen extends StatelessWidget {
               description:
                   'Customize preferences, adjust schedules, and manage connected devices.',
               onTap: () {
-                Navigator.push(
+               Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const EnergySettingScreen()));
@@ -278,27 +278,135 @@ class _ExploreTabState extends State<ExploreTab> {
                 ),
               ),
 
+// 🔹 Guidance Feature Box
+// 🔹 Guidance Button
+Center(
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.center, // Center horizontally
+    children: [
+      // 🔹 Guidance Button
+      ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        icon: const Icon(Icons.info, size: 24),
+        label: const Text(
+          'Guidance',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Guidance: Smart Energy System'),
+              content: const Text(
+                'The Smart Energy System is designed to monitor, analyze, '
+                'and optimize electricity consumption. It provides real-time '
+                'usage data, detailed analytics, automated scheduling, and '
+                'customizable settings to help users save energy and reduce costs.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+
+      const SizedBox(width: 16), // Space between buttons
+
+      // 🔹 Paper Works Button
+      ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        icon: const Icon(Icons.picture_as_pdf, size: 24), // PDF icon
+        label: const Text(
+          'Paper Works',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        onPressed: () {
+          // TODO: Add code to open PDF
+        },
+      ),
+
+      const SizedBox(width: 16), // Space between buttons
+
+      // 🔹 Features Button
+      ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        icon: const Icon(Icons.star, size: 24), // Star icon for features
+        label: const Text(
+          'Features',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Features: Smart Energy System'),
+              content: const Text(
+                '• Real-time electricity monitoring\n'
+                '• Usage analytics & reports\n'
+                '• Automated appliance scheduling\n'
+                '• Customizable energy-saving modes\n'
+                '• Mobile app control and notifications',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ],
+  ),
+),
+
               // 🔹 Feature Box (Added here)
-               InkWell(
+              InkWell(
   onTap: () {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const HomeScreen()), // Update to your screen
     );
   },
-  borderRadius: BorderRadius.circular(12), // for ripple effect
+  borderRadius: BorderRadius.circular(12), // ripple effect shape
   child: Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     child: Row(
       children: [
         Container(
           width: 100,
-          height: 50,
+          height: 80, // fixed height so the container is visible
           decoration: BoxDecoration(
             color: Colors.orange.withAlpha(200),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(Icons.bolt, color: Colors.white, size: 50),
+         child: const Icon(Icons.analytics, color: Colors.white, size: 50),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -327,6 +435,8 @@ class _ExploreTabState extends State<ExploreTab> {
     ),
   ),
 ),
+
+
              InkWell(
   onTap: () {
     Navigator.push(
@@ -341,7 +451,7 @@ class _ExploreTabState extends State<ExploreTab> {
       children: [
         Container(
           width: 100,
-         height: 50,
+         height: 80,
           decoration: BoxDecoration(
             color: Colors.teal.withAlpha(200),
             borderRadius: BorderRadius.circular(12),
@@ -392,7 +502,7 @@ InkWell(
       children: [
         Container(
           width: 100,
-          height: 50,
+          height: 80,
           decoration: BoxDecoration(
             color: Colors.blue.withAlpha(200),
             borderRadius: BorderRadius.circular(12),
@@ -427,10 +537,10 @@ InkWell(
 ),
 InkWell(
   onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const EnergySettingScreen()), // navigate to Energy Settings
-    );
+   Navigator.push(
+     context,
+     MaterialPageRoute(builder: (context) => const EnergySettingScreen()), // navigate to Energy Settings
+  );
   },
   borderRadius: BorderRadius.circular(12), // ripple effect shape
   child: Padding(
@@ -439,7 +549,7 @@ InkWell(
       children: [
         Container(
           width: 100,
-          height: 50,
+          height: 80,
           decoration: BoxDecoration(
             color: Colors.orange.withAlpha(200),
             borderRadius: BorderRadius.circular(12),
@@ -475,8 +585,8 @@ InkWell(
 ),
 InkWell(
   onTap: () {
-    Navigator.push(
-      context,
+   Navigator.push(
+    context,
       MaterialPageRoute(builder: (context) => const EnergyProfileScreen()), // navigate to Profile screen
     );
   },
@@ -487,7 +597,7 @@ InkWell(
       children: [
         Container(
           width: 100,
-          height: 50,
+          height: 90,
           decoration: BoxDecoration(
             color: Colors.blue.withAlpha(200),
             borderRadius: BorderRadius.circular(12),
@@ -522,7 +632,7 @@ InkWell(
 
 
 
-const SizedBox(height: 10),
+              const SizedBox(height: 12),
 
               // Feature List
               Expanded(
@@ -559,8 +669,18 @@ const SizedBox(height: 10),
             case 2:
               page = const AnalyticsScreen();
               break;
+              case 3:
+              page = const EnergySchedulingScreen();
+              break;
+             case 4:
+              page = const EnergySettingScreen();
+              break;
+              case 5:
+              page = const EnergyProfileScreen();
+              break;
             default:
-              return;
+            page = const HomeScreen();
+              
           }
           Navigator.pushReplacement(
             context,

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'analytics.dart';
 import 'explore.dart'; 
+import 'schedule.dart'; 
+import 'settings.dart'; 
+import 'profile.dart';
 import '../main.dart'; // Assuming AnimatedBackground & BackgroundShapes are in main.dart
 
 class HomeScreen extends StatefulWidget {
@@ -125,7 +128,23 @@ class _HomeScreenState extends State<HomeScreen> {
             context,
             MaterialPageRoute(builder: (_) => const AnalyticsScreen()),
           );
-        } else {
+        }else if (index == 3) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const EnergySchedulingScreen()),
+          );
+          } else if (index == 4) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const EnergySettingScreen()),
+          );
+          } else if (index == 5) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const EnergyProfileScreen()),
+          );
+          }
+          else {
           setState(() {
             _currentIndex = index;
           });
