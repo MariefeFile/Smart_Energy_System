@@ -132,36 +132,37 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.black.withAlpha((255 * 0.4).toInt()),
         currentIndex: 2, // Analytics
-        onTap: (index) {
-          if (index == 2) return; // Already on Analytics
+       onTap: (index) {
+  if (index == 2) return; // Already on Analytics
 
-          Widget page;
+  Widget page;
 
-          switch (index) {
-           case 0:
-             page = const HomeScreen();
-             break;
-           case 1:
-             page = const ExploreTab();
-             break;
-            case 3:
-             page = const EnergySchedulingScreen();
-             return;
-            case 4:
-             page = const EnergySettingScreen();
-             return;
-            case 5:
-             page = const EnergyProfileScreen();
-             return;
-            default:
-            page = const HomeScreen();
-            }
+  switch (index) {
+    case 0:
+      page = const HomeScreen();
+      break;
+    case 1:
+      page = const ExploreTab();
+      break;
+    case 3:
+      page = const EnergySchedulingScreen(); // ✅ removed "return"
+      break;
+    case 4:
+      page = const EnergySettingScreen();
+      break;
+    case 5:
+      page = const EnergyProfileScreen();
+      break;
+    default:
+      page = const HomeScreen();
+  }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => page),
-    );
-  },
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => page),
+  );
+},
+
   items: const [
     BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
     BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),

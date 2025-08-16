@@ -200,7 +200,7 @@ class _ExploreTabState extends State<ExploreTab> {
                 backgroundColor: Colors.white.withAlpha(204),
                 elevation: 0,
                 title: const Text(
-                  'Smart Energy System',
+                  'Explore More',
                   style: TextStyle(
                     color: Colors.black87,
                     fontWeight: FontWeight.bold,
