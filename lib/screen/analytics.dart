@@ -129,7 +129,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
         backgroundColor: Colors.black.withAlpha((255 * 0.4).toInt()),
         currentIndex: 2, // Analytics
        onTap: (index) {

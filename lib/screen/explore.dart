@@ -655,7 +655,7 @@ InkWell(
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
         backgroundColor: Colors.black.withAlpha(102),
         currentIndex: 1,
         onTap: (index) {

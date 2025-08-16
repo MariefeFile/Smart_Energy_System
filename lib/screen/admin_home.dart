@@ -113,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return BottomNavigationBar(
       currentIndex: _currentIndex,
       selectedItemColor: Colors.teal,
-      unselectedItemColor: Colors.grey,
+      unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
       backgroundColor: Colors.black.withAlpha((255 * 0.4).toInt()),
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
