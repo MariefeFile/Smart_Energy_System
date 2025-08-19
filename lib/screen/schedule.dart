@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
- import '../main.dart'; 
 import 'admin_home.dart';
 import 'explore.dart';
 import 'analytics.dart';
@@ -43,7 +42,7 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
     },
   ];
 
-  // 🔹 Dropdown values for new task
+  // Dropdown values
   String? selectedHour;
   String? selectedMinute;
   String? selectedDevice;
@@ -147,7 +146,6 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
                   });
                   Navigator.pop(context);
 
-                  // Reset for next input
                   selectedDevice = null;
                   selectedHour = null;
                   selectedMinute = null;
@@ -161,7 +159,71 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
     );
   }
 
-  // 🔹 Remove task
+  // 🔹 Edit task dialog
+  void _editTask(int index) {
+    final task = _scheduledTasks[index];
+
+    String editedDevice = task["device"];
+    String editedTime = task["time"];
+    String editedEnergy = task["energy"];
+    String editedCost = task["cost"];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Edit Task"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: const InputDecoration(labelText: "Device"),
+                controller: TextEditingController(text: editedDevice),
+                onChanged: (value) => editedDevice = value,
+              ),
+              TextField(
+                decoration: const InputDecoration(labelText: "Time"),
+                controller: TextEditingController(text: editedTime),
+                onChanged: (value) => editedTime = value,
+              ),
+              TextField(
+                decoration: const InputDecoration(labelText: "Energy"),
+                controller: TextEditingController(text: editedEnergy),
+                onChanged: (value) => editedEnergy = value,
+              ),
+              TextField(
+                decoration: const InputDecoration(labelText: "Cost"),
+                controller: TextEditingController(text: editedCost),
+                onChanged: (value) => editedCost = value,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _scheduledTasks[index] = {
+                    "device": editedDevice,
+                    "time": editedTime,
+                    "energy": editedEnergy,
+                    "cost": editedCost,
+                    "icon": task["icon"]
+                  };
+                });
+                Navigator.pop(context);
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _removeTask(int index) {
     setState(() {
       _scheduledTasks.removeAt(index);
@@ -169,216 +231,282 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          const Positioned.fill(child: AnimatedBackground()),
-          const Positioned.fill(child: BackgroundShapes()),
-          Column(
-            children: [
-              AppBar(
-                backgroundColor: Colors.white.withAlpha((255 * 0.8).toInt()),
-                elevation: 0,
-                title: const Text(
-                  'Energy Scheduling',
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              
-                 leading: const Icon(Icons.add, color: Colors.teal),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.notifications, color: Colors.teal),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      _isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                      color: Colors.teal,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isDarkMode = !_isDarkMode;
-                      });
-                    },
-                  ),
-                  const CircleAvatar(
-                    backgroundColor: Colors.teal,
-                    child: Icon(Icons.person, color: Colors.white),
-                  ),
-                  const SizedBox(width: 12),
+          // 🔹 Background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF1a2332),
+                  Color(0xFF0f1419),
                 ],
+              ),
+            ),
           ),
-        ],
-      ),
-        
 
-        // 🔹 Foreground content
-        Padding(
-  padding: EdgeInsets.fromLTRB(
-      16, kToolbarHeight + MediaQuery.of(context).padding.top + 16, 16, 16),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Eco Tip Banner
-              Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(12),
+          // 🔹 Foreground Content
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Eco Tip
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.teal.shade50.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.lightbulb, color: Colors.teal),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "Tip: Running the Washing Machine at 10 PM could save ₱5 (off-peak rate).",
+                            style: TextStyle(
+                                color: Colors.teal.shade900,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+
+                  if (_scheduledTasks.isNotEmpty) ...[
+                    Text("Next Scheduled Task",
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[400])),
+                    const SizedBox(height: 8),
+                    _buildTaskCard(_scheduledTasks[0], 0),
+                  ],
+
+                  const SizedBox(height: 24),
+                  const Text("Upcoming Tasks",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
+                  const SizedBox(height: 5),
+                  Column(
+                    children: _scheduledTasks.length > 1
+                        ? _scheduledTasks
+                            .sublist(1)
+                            .asMap()
+                            .entries
+                            .map((entry) =>
+                                _buildTaskCard(entry.value, entry.key + 1))
+                            .toList()
+                        : [
+                            const Text(
+                              "No upcoming tasks.",
+                              style: TextStyle(color: Colors.white70),
+                            )
+                          ],
+                  ),
+
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: _addTask,
+                      child: const Text("Add Task",
+                          style: TextStyle(fontSize: 16, color: Colors.white)),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+
+          // 🔹 Top AppBar
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Container(
+                height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.teal.shade50..withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withValues(alpha: 0.8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.lightbulb, color: Colors.teal),
-                    const SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 16),
+                    const Icon(Icons.add, color: Colors.teal),
+                    const SizedBox(width: 16),
+                    const Expanded(
                       child: Text(
-                        "Tip: Running the Washing Machine at 10 PM could save ₱5 (off-peak rate).",
+                        'Energy Scheduling',
                         style: TextStyle(
-                            color: Colors.teal.shade900,
-                            fontWeight: FontWeight.w600),
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
-                    )
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.notifications, color: Colors.teal),
+                      onPressed: () {},
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                        color: Colors.teal,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isDarkMode = !_isDarkMode;
+                        });
+                      },
+                    ),
+                    const CircleAvatar(
+                      backgroundColor: Colors.teal,
+                      child: Icon(Icons.person, color: Colors.white),
+                    ),
+                    const SizedBox(width: 12),
                   ],
                 ),
               ),
-
-              // Next Scheduled Task
-              if (_scheduledTasks.isNotEmpty) ...[
-                Text("Next Scheduled Task",
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[600])),
-                const SizedBox(height: 8),
-                _buildTaskCard(_scheduledTasks[0], 0),
-              ],
-
-              const SizedBox(height: 24),
-
-              // Upcoming Tasks
-              const Text("Upcoming Tasks",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Expanded(
-                child: _scheduledTasks.length > 1
-                    ? ListView.builder(
-                        itemCount: _scheduledTasks.length - 1,
-                        itemBuilder: (context, index) {
-                          return _buildTaskCard(
-                              _scheduledTasks[index + 1], index + 1);
-                        },
-                      )
-                    : const Center(
-                        child: Text("No upcoming tasks."),
-                      ),
-              ),
-
-              // Add Task Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: _addTask,
-                  child: const Text("Add Task",
-                      style: TextStyle(fontSize: 16, color: Colors.white)),
-                ),
-              )
-            ],
+            ),
           ),
-        ),
-      ],
-    ),
-    bottomNavigationBar: BottomNavigationBar(
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
-       unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-        backgroundColor: Colors.black.withAlpha((255 * 0.4).toInt()),
-      currentIndex: _currentIndex,
-      onTap: _onTabTapped,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: "Energy"),
-        BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
-        BottomNavigationBarItem(icon: Icon(Icons.analytics), label: "Analytics"),
-        BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Schedule"),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-      ],
-    ),
-  );
-}
-  // 🔹 Task Card Widget (screenshot style)
+        unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
+        backgroundColor: Colors.black.withValues(alpha: 0.4),
+        currentIndex: _currentIndex,
+        onTap: _onTabTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: "Energy"),
+          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.analytics), label: "Analytics"),
+          BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Schedule"),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+        ],
+      ),
+    );
+  }
+
+  // 🔹 Task Card Widget
+// 🔹 Task Card Widget with Gradient Background
 Widget _buildTaskCard(Map<String, dynamic> task, int index) {
   return Container(
-    margin: const EdgeInsets.only(bottom: 16), // increased margin
-    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16), // increased padding
+    margin: const EdgeInsets.only(bottom: 12),
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16), // slightly larger border radius
+      gradient: const LinearGradient(
+        colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(14),
       boxShadow: [
         BoxShadow(
-          color: Colors.grey.withAlpha((255 * 0.15).toInt()),
-          blurRadius: 8, // increased blur
-          offset: const Offset(0, 4), // increased offset
-        )
+          color: Colors.black.withValues(alpha: 0.25),
+          blurRadius: 10,
+          offset: const Offset(0, 6),
+        ),
       ],
     ),
     child: Row(
       children: [
+        // 🔵 Icon Avatar
         CircleAvatar(
-          radius: 32, // increased from 24 to 32
-          backgroundColor: Colors.blue.shade50,
-          child: Icon(task["icon"], size: 32, color: Colors.blue), // increased icon size
+          radius: 24,
+          backgroundColor: Colors.white.withValues(alpha: 0.1),
+          child: Icon(task["icon"], size: 22, color: Colors.tealAccent),
         ),
-        const SizedBox(width: 16), // increased spacing
+        const SizedBox(width: 12),
+
+        // 📋 Task Info
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(task["device"],
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold)), // increased from 14 to 16
-              const SizedBox(height: 4), // increased spacing
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white)),
+              const SizedBox(height: 2),
               Text(task["time"],
-                  style: const TextStyle(color: Colors.grey, fontSize: 14)), // increased from 12 to 14
-              const SizedBox(height: 6), // increased spacing
+                  style: TextStyle(color: Colors.grey[400], fontSize: 13)),
+              const SizedBox(height: 4),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // increased padding
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
-                  borderRadius: BorderRadius.circular(8), // increased border radius
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text("Estimated energy: ${task["energy"]}",
-                    style: const TextStyle(fontSize: 12, color: Colors.green)), // increased from 10 to 12
+                child: Text("Energy: ${task["energy"]}",
+                    style: const TextStyle(
+                        fontSize: 11, color: Colors.white)),
               ),
             ],
           ),
         ),
+
+        // 💰 Cost + Actions
         Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(task["cost"],
                 style: const TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.bold)), // increased from 14 to 16
-            const SizedBox(height: 8), // added spacing between cost and delete button
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red, size: 22), // increased from 18 to 22
-              onPressed: () => _removeTask(index),
-              padding: const EdgeInsets.all(4), // added some padding
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32), // minimum touch target
-            ),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white)),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.orange, size: 20),
+                  onPressed: () => _editTask(index),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+                const SizedBox(width: 6),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                  onPressed: () => _removeTask(index),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            )
           ],
         )
       ],
     ),
   );
-}}
+}
+
+}

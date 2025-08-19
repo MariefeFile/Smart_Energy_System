@@ -121,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (index == 1) {
           Navigator.pushReplacement(
             context,
-           MaterialPageRoute(builder: (_) => ExploreTab())
+           MaterialPageRoute(builder: (_) =>const ExploreTab())
           );
         } else if (index == 2) {
           Navigator.pushReplacement(
