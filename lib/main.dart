@@ -4,6 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'dart:ui';
 import 'screen/login.dart';
 import 'screen/user_signup.dart';
+import 'package:smartenergy_app/screen/my_admin.dart';
 
 void main() {
   runApp(const MyApp());
@@ -111,39 +112,49 @@ class _HomeState extends State<Home> {
         child: Stack(
           children: [
             Center(
-  child: Column(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      // ✅ Larger Lottie Logo
-      Lottie.asset(
-        'assets/Animation - 1750510706715.json',
-        width: 250,
-        height: 250,
-      ),
-      const SizedBox(height: 8), // reduced from 20 to 8
-      const Text(
-        'Welcome Back!',
-        style: TextStyle(
-          fontSize: 30,
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.5,
-        ),
-      ),
-      const SizedBox(height: 12),
-      const Text(
-        'Enter personal details to your\nuser account',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 16,
-          color: Colors.white70,
-          height: 1.4,
-        ),
-      ),
-    ],
-  ),
-),
-
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // ✅ Larger Lottie Logo
+                  Lottie.asset(
+                    'assets/Animation - 1750510706715.json',
+                    width: 250,
+                    height: 250,
+                  ),
+                  const SizedBox(height: 8),
+                  // ✅ Double-tap to go to AdminScreen
+                  GestureDetector(
+                    onDoubleTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AdminScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Welcome Back!',
+                      style: TextStyle(
+                        fontSize: 30,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Enter personal details to your\nuser account',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Positioned(
               bottom: 30,
               left: 40,
