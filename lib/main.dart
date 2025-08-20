@@ -128,7 +128,7 @@ class _HomeState extends State<Home> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const AdminScreen(),
+                          builder: (_) => const SmartEnergyDashboard(),
                         ),
                       );
                     },

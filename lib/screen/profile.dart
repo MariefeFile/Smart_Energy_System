@@ -14,16 +14,9 @@ class EnergyProfileScreen extends StatefulWidget {
 
 class _EnergyProfileScreenState extends State<EnergyProfileScreen>
     with SingleTickerProviderStateMixin {
-  bool _isDarkMode = false;
   int _currentIndex = 5; // Profile tab
-  final List<String> energyTips = [
-    "Turn off lights when not in use.",
-    "Use energy-efficient appliances.",
-    "Reduce standby power consumption.",
-    "Schedule high-energy tasks at night.",
-  ];
-
   late AnimationController _animationController;
+  bool _isDarkMode = false;
 
   @override
   void initState() {
@@ -33,6 +26,12 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
       duration: const Duration(milliseconds: 800),
     );
     _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   void _onTabTapped(int index) {
@@ -68,41 +67,47 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor =
-        _isDarkMode ? Colors.grey[900] : const Color(0xFF1a2332);
-
     return Scaffold(
-      body: AnimatedContainer(
-        duration: const Duration(milliseconds: 500),
-        color: backgroundColor,
-        child: Column(
-          children: [
-            _buildAppBar(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    _profileHeader(),
-                    const SizedBox(height: 20),
-                    _energySummaryCards(),
-                    const SizedBox(height: 20),
-                    _quickActions(),
-                    const SizedBox(height: 20),
-                    _achievements(),
-                    const SizedBox(height: 20),
-                    _energyTips(),
-                  ],
-                ),
+      body: Stack(
+        children: [
+          // ✅ Gradient background matching admin_home.dart
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF1a2332),
+                  Color(0xFF0f1419),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          // Main content
+          SafeArea(
+            child: Column(
+              children: [
+                _buildAppBar(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _buildProfileCard(),
+                        const SizedBox(height: 20),
+                        _buildMenuOptions(),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.tealAccent,
-        unselectedItemColor: Colors.white70,
+        unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
         backgroundColor: Colors.black.withAlpha((255 * 0.4).toInt()),
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
@@ -120,13 +125,15 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
 
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white.withAlpha((255 * 0.8).toInt()),
+      backgroundColor: _isDarkMode
+          ? Colors.grey[850]?.withValues(alpha: 0.8)
+          : Colors.white.withValues(alpha: 0.8),
       elevation: 0,
       title: const Text(
         'Profile',
-        style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        style: TextStyle(fontWeight: FontWeight.bold),
       ),
-      leading: const Icon(Icons.menu, color: Colors.teal),
+      leading: const Icon(Icons.add, color: Colors.teal),
       actions: [
         IconButton(
           icon: const Icon(Icons.notifications, color: Colors.teal),
@@ -152,196 +159,328 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
     );
   }
 
-  // Unified box style function
-  BoxDecoration boxDecoration() {
-    return BoxDecoration(
-      color: Colors.white24,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.3),
-          blurRadius: 8,
-          offset: const Offset(0, 4),
+  Widget _buildProfileCard() {
+    return Container(
+      margin: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha((0.3 * 255).toInt()),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(25),
+        child: Column(
+          children: [
+            // Profile Header
+            Row(
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFF4ECDC4), width: 3),
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/profile_avatar.jpg', // Add your image asset
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const CircleAvatar(
+                          backgroundColor: Color(0xFF4ECDC4),
+                          child: Icon(Icons.person, size: 40, color: Colors.white),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Marie Fe Tapales',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        'Home Owner',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[400],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.edit, color: Colors.grey[400]),
+                  onPressed: () {},
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 30),
+            
+            // Energy Stats Section
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Energy Stats',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Stats Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      _buildStatItem('Current Energy Usage', '350'),
+                      const SizedBox(height: 15),
+                      _buildStatItem('Monthly Savings', '\$25'),
+                      const SizedBox(height: 15),
+                      _buildStatItem('Carbon Reduction', '120'),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 30),
+                // Circular Progress Indicator
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: CircularProgressIndicator(
+                        value: 0.7,
+                        strokeWidth: 8,
+                        backgroundColor: Colors.white.withAlpha((0.2 * 255).toInt()),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF10b981),
+                        ),
+                      ),
+                    ),
+                    Column(
+                      children: [
+                        const Text(
+                          '120',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          'kg CO₂',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[400],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[400],
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
       ],
     );
   }
 
-  Widget _profileHeader() {
+  Widget _buildMenuOptions() {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: boxDecoration(),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 40,
-            backgroundColor: Colors.teal,
-            child: Icon(Icons.person, size: 40, color: Colors.white),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Marie Fe Tapales",
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
-                const SizedBox(height: 4),
-                const Text("Energy Saver Level: 3",
-                    style: TextStyle(color: Colors.white70)),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: 0.6,
-                  color: Colors.greenAccent,
-                  backgroundColor: Colors.white24,
-                  minHeight: 10,
-                ),
-              ],
-            ),
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha((0.3 * 255).toInt()),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _energySummaryCards() {
-    return Column(
-      children: [
-        _energyCard("Lighting", "3.5 kWh", 0.7, Colors.yellow),
-        const SizedBox(height: 12),
-        _energyCard("Kitchen", "2.1 kWh", 0.4, Colors.orange),
-        const SizedBox(height: 12),
-        _energyCard("Air Conditioning", "5.0 kWh", 0.9, Colors.blue),
-      ],
-    );
-  }
-
-  Widget _energyCard(String label, String value, double percent, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: boxDecoration(),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: color.withValues(alpha: 0.3),
-            child: Icon(Icons.bolt, color: color),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.white)),
-                const SizedBox(height: 6),
-                LinearProgressIndicator(
-                  value: percent,
-                  color: color,
-                  backgroundColor: Colors.white24,
-                  minHeight: 8,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Text(value, style: const TextStyle(color: Colors.white)),
-        ],
-      ),
-    );
-  }
-
-  Widget _quickActions() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _actionButton(Icons.lightbulb, 'Lights', Colors.yellow),
-        _actionButton(Icons.schedule, 'Schedule', Colors.blue),
-        _actionButton(Icons.power, 'All Off', Colors.red),
-      ],
-    );
-  }
-
-  Widget _actionButton(IconData icon, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: boxDecoration(),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: color.withValues(alpha: 0.2),
-            child: Icon(icon, color: color, size: 28),
+          _buildMenuItem(Icons.person_outline, 'Personal Info', () {}),
+          _buildDivider(),
+          _buildMenuItem(Icons.security, 'Security', () {}),
+          _buildDivider(),
+          _buildMenuItem(Icons.notifications_outlined, 'Notifications', () {}),
+          _buildDivider(),
+          _buildMenuItem(Icons.devices, 'Connected Devices', () {}),
+          _buildDivider(),
+          _buildMenuItem(Icons.bar_chart, 'View Energy History', () {}),
+          _buildDivider(),
+          _buildMenuItem(Icons.settings, 'Manage Smart Devices', () {}),
+          
+          const SizedBox(height: 20),
+          
+          // Help & Support and Logout
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    'Help & Support',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _showLogoutDialog();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF6B6B),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: const Text(
+                    'Logout',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 6),
-          Text(label,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+          
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  Widget _achievements() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("Achievements",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _badge(Icons.star, "Eco Star"),
-            _badge(Icons.emoji_events, "Energy Hero"),
-            _badge(Icons.leaderboard, "Top Saver"),
+  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.teal,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: Colors.white, size: 20),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.white,
+        ),
+      ),
+      trailing: Icon(Icons.arrow_forward_ios, 
+        color: Colors.grey[400], size: 16),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 25),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      child: Divider(color: Colors.white.withAlpha((0.2 * 255).toInt()), height: 1),
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1e293b),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'Logout',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(color: Colors.grey[400]),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey[400]),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Add your logout logic here
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6B6B),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Logout'),
+            ),
           ],
-        )
-      ],
-    );
-  }
-
-  Widget _badge(IconData icon, String title) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: boxDecoration(),
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: Colors.white24,
-            child: Icon(icon, color: Colors.yellowAccent, size: 28),
-          ),
-          const SizedBox(height: 6),
-          Text(title,
-              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-
-  Widget _energyTips() {
-    final tip = (energyTips..shuffle()).first;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: boxDecoration(),
-      child: Row(
-        children: [
-          const Icon(Icons.lightbulb, color: Colors.yellow),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              tip,
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
