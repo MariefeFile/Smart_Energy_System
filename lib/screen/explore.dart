@@ -15,53 +15,12 @@ class ExploreTab extends StatefulWidget {
 
 class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
   bool _isDarkMode = false;
-  String _searchQuery = '';
+  
 
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
-  final List<Map<String, dynamic>> features = [
-    {
-      "icon": Icons.bolt,
-      "color": Colors.orange,
-      "title": "Energy Usage",
-      "description":
-          "Monitor your real-time electricity consumption, identify high-usage devices, and track trends.",
-      "screen": const HomeScreen(),
-    },
-    {
-      "icon": Icons.analytics,
-      "color": Colors.teal,
-      "title": "Energy Analytics",
-      "description":
-          "View insights, detect trends, and generate reports to optimize energy efficiency.",
-      "screen": const AnalyticsScreen(),
-    },
-    {
-      "icon": Icons.schedule,
-      "color": Colors.blue,
-      "title": "Energy Scheduling",
-      "description":
-          "Plan and automate appliance usage to save energy and reduce costs.",
-      "screen": const EnergySchedulingScreen(),
-    },
-    {
-      "icon": Icons.settings,
-      "color": Colors.orange,
-      "title": "Energy Settings",
-      "description":
-          "Customize preferences, adjust schedules, and manage connected devices.",
-      "screen": const EnergySettingScreen(),
-    },
-    {
-      "icon": Icons.person,
-      "color": Colors.blue,
-      "title": "Profile",
-      "description":
-          "Manage account details, update personal info, and set preferences.",
-      "screen": const EnergyProfileScreen(),
-    },
-  ];
+  
 
   @override
   void initState() {
@@ -82,13 +41,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final filteredFeatures = features.where((feature) {
-      final title = feature['title'] as String;
-      final details = feature['description'] as String;
-      final query = _searchQuery.toLowerCase();
-      return title.toLowerCase().contains(query) ||
-          details.toLowerCase().contains(query);
-    }).toList();
+    
 
     return Scaffold(
       body: Stack(
@@ -178,7 +131,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                             Expanded(
                               child: TextField(
                                 decoration: InputDecoration(
-                                  hintText: 'Search features...',
+                                  hintText: 'Search devices....',
                                   prefixIcon: const Icon(Icons.search, color: Colors.teal),
                                   filled: true,
                                   fillColor: Colors.white.withAlpha(200),
@@ -189,7 +142,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                                 ),
                                 onChanged: (value) {
                                   setState(() {
-                                    _searchQuery = value;
+                                    
                                   });
                                 },
                               ),
@@ -245,46 +198,18 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                               },
                             ),
                             const SizedBox(width: 12),
-                            _quickActionButton(
-                              icon: Icons.picture_as_pdf,
-                              label: "Paper Works",
-                              onPressed: () {},
-                            ),
-                            const SizedBox(width: 12),
-                            _quickActionButton(
-                              icon: Icons.star,
-                              label: "Features",
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Features: Smart Energy System'),
-                                    content: const Text(
-                                      '• Real-time electricity monitoring\n'
-                                      '• Usage analytics & reports\n'
-                                      '• Automated appliance scheduling\n'
-                                      '• Customizable energy-saving modes\n'
-                                      '• Mobile app control and notifications',
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text('Close'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
+                            
+                            
+                           
                           ],
                         ),
 
-                        const SizedBox(height: 30),
+                        
 
                         // Feature Cards
-                        ...filteredFeatures.map((feature) => _buildFeatureCard(feature)),
+                        
 
-                        const SizedBox(height: 30),
+                        
                       ],
                     ),
                   ),
@@ -343,45 +268,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildFeatureCard(Map<String, dynamic> feature) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: const Color(0xFF1f2937),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        leading: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: feature['color'],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(feature['icon'], color: Colors.white, size: 28),
-        ),
-        title: Text(
-          feature['title'],
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        subtitle: Text(
-          feature['description'],
-          style: const TextStyle(fontSize: 13, color: Colors.white70),
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 18),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => feature['screen']),
-          );
-        },
-      ),
-    );
-  }
-
+  
 
   Widget _quickActionButton({
     required IconData icon,

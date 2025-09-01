@@ -14,14 +14,70 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late int _currentIndex;
   bool _isDarkMode = false;
+
+  late AnimationController _sidebarController;
+  late AnimationController _overlayController;
+
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+
+    _sidebarController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(-1.0, 0.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _sidebarController, curve: Curves.easeInOut));
+
+    _overlayController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _overlayController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _sidebarController.dispose();
+    _overlayController.dispose();
+    super.dispose();
+  }
+
+  void _openFeatures() {
+    _overlayController.forward();
+    _sidebarController.forward();
+  }
+
+  void _closeFeatures() {
+    _overlayController.reverse();
+    _sidebarController.reverse();
+  }
+
+  void _toggleFeatures() {
+    if (_sidebarController.isCompleted) {
+      _closeFeatures();
+    } else {
+      _openFeatures();
+    }
+  }
+
+  void selectFeature(String featureName, Widget screen) {
+    _closeFeatures();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => screen));
+    });
   }
 
   @override
@@ -29,32 +85,28 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // ✅ Gradient background
+          // Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1a2332),
-                  Color(0xFF0f1419),
-                ],
+                colors: [Color(0xFF1a2332), Color(0xFF0f1419)],
               ),
             ),
           ),
 
-          // ✅ Main content
+          // Main content
           Column(
             children: [
-              // Custom Top AppBar
               SafeArea(
                 child: Container(
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.white.withAlpha((255 * 0.8).toInt()),
+                    color: Colors.white.withAlpha(200),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withAlpha((255 * 0.1).toInt()),
+                        color: Colors.black.withAlpha(25),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -63,12 +115,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Row(
                     children: [
                       const SizedBox(width: 16),
-                      const Icon(Icons.add, color: Colors.teal),
-                      const SizedBox(width: 16),
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'Smart Energy System',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.black87,
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
@@ -80,10 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () {},
                       ),
                       IconButton(
-                        icon: Icon(
-                          _isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                          color: Colors.teal,
-                        ),
+                        icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode, color: Colors.teal),
                         onPressed: () {
                           setState(() {
                             _isDarkMode = !_isDarkMode;
@@ -99,8 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-
-              // Dashboard content
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
@@ -126,19 +171,89 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+
+          // Overlay
+          IgnorePointer(
+            ignoring: _sidebarController.status != AnimationStatus.completed,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: GestureDetector(
+                onTap: _closeFeatures,
+                child: Container(color: Colors.black.withAlpha(100)),
+              ),
+            ),
+          ),
+
+          // Sidebar
+          SlideTransition(
+            position: _slideAnimation,
+            child: Container(
+              width: 250,
+              height: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
+                ),
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    const SizedBox(height: 80), // small space from top
+    const Text(
+      'Energy Features',
+      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.white),
+    ),
+    const SizedBox(height: 20),
+    Expanded(child: ListView(children: _buildFeaturesList())),
+  ],
+),
+
+                ),
+              ),
+            ),
+          ),
+
+          // Floating "Open Features" Button (bottom-left)
+          Positioned(
+            top: 40,
+            left: 20,
+            child: GestureDetector(
+              onTap: _toggleFeatures,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(100),
+                      blurRadius: 6,
+                      offset: const Offset(2, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.add, color: Colors.white, size: 28),
+              ),
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
-  // 🔹 Bottom Navigation
+  // ---------------------- Bottom Nav Bar ----------------------
   Widget _buildBottomNavBar() {
     return BottomNavigationBar(
       currentIndex: _currentIndex,
       selectedItemColor: Colors.teal,
       unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-      backgroundColor: Colors.black.withAlpha((255 * 0.4).toInt()),
+      backgroundColor: Colors.black.withAlpha(100),
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
       onTap: (index) {
@@ -165,10 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
           default:
             page = const HomeScreen();
         }
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => page),
-        );
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => page));
       },
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
@@ -181,14 +293,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🔹 Dashboard Cards & Sections
+  // ---------------------- Dashboard Cards & Sections ----------------------
   Widget _currentEnergyCard() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
-        ),
+        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -199,12 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: const [
                 Text('Current Energy Usage', style: TextStyle(color: Colors.white70)),
                 SizedBox(height: 8),
-                Text('24.8 kWh',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    )),
+                Text('24.8 kWh', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                 Text('+2.5% less than yesterday', style: TextStyle(color: Colors.white70)),
               ],
             ),
@@ -222,11 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   strokeWidth: 6,
                 ),
               ),
-              const Text('70%',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  )),
+              const Text('70%', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ],
           ),
         ],
@@ -235,301 +336,171 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _solarProductionCard() {
-  return Container(
-    width: 130,
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      gradient: const LinearGradient(
-        colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+    return Container(
+      width: 130,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+        borderRadius: BorderRadius.circular(12),
       ),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Monthly Consumption',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white70, // text color for dark background
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          '8.2 kWh',
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.tealAccent, // brighter text on dark background
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 4),
-        LinearProgressIndicator(
-          value: 0.7,
-          backgroundColor: Colors.white24, // subtle background
-          color: Colors.orangeAccent, // stands out on dark background
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'Consume hours: 5.2 hrs',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.white70,
-          ),
-        ),
-      ],
-    ),
-  );
-}
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text('Monthly Consumption', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70)),
+          SizedBox(height: 8),
+          Text('8.2 kWh', style: TextStyle(fontSize: 18, color: Colors.tealAccent, fontWeight: FontWeight.bold)),
+          SizedBox(height: 4),
+          LinearProgressIndicator(value: 0.7, backgroundColor: Colors.white24, color: Colors.orangeAccent),
+          SizedBox(height: 4),
+          Text('Consume hours: 5.2 hrs', style: TextStyle(fontSize: 12, color: Colors.white70)),
+        ],
+      ),
+    );
+  }
 
-  // 🔹 Updated Energy Consumption Chart
-// 🔹 Updated Energy Consumption Chart (Dark Gradient Style)
-Widget _energyConsumptionChart() {
-  return Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      gradient: const LinearGradient(
-        colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+  Widget _energyConsumptionChart() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+        borderRadius: BorderRadius.circular(12),
       ),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Column(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Energy Consumption', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
+          const SizedBox(height: 12),
+          Container(
+            height: 120,
+            decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8)),
+            child: const Center(child: Text('Graph Placeholder', style: TextStyle(color: Colors.white70))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _connectedDevicesSection() {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Energy Consumption',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.white),
-            ),
-            Row(
+        const Text('Connected Devices', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        _deviceTile(Icons.lightbulb, 'Smart Light', 'Living Room - Online'),
+        const SizedBox(height: 8),
+        _deviceTile(Icons.ac_unit, 'Air Conditioner', 'Bedroom - Offline'),
+        const SizedBox(height: 8),
+        _deviceTile(Icons.tv, 'Smart TV', 'Living Room - Online'),
+      ],
+    );
+  }
+
+  Widget _deviceTile(IconData icon, String title, String status) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.tealAccent),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _filterButton('Today', isActive: true),
-                const SizedBox(width: 6),
-                _filterButton('Week'),
-                const SizedBox(width: 6),
-                _filterButton('Month'),
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                Text(status, style: const TextStyle(fontSize: 12, color: Colors.white70)),
               ],
             ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Container(
-          height: 120,
-          decoration: BoxDecoration(
-            color: Colors.white24, // lighter overlay for chart area
-            borderRadius: BorderRadius.circular(8),
           ),
-          child: const Center(
-              child: Text(
-            'Graph Placeholder',
-            style: TextStyle(color: Colors.white70),
-          )),
+        ],
+      ),
+    );
+  }
+
+  Widget _energyTipsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Energy Savings Tips', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        _tipTile(Icons.check_circle, 'Optimize AC Usage', 'Set to 24°C could save 15%'),
+        const SizedBox(height: 8),
+        _tipTile(Icons.schedule, 'Solar Power Hours', 'Use heavy appliances 10AM - 2PM'),
+      ],
+    );
+  }
+
+  Widget _tipTile(IconData icon, String title, String subtitle) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.tealAccent),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.white70)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildFeaturesList() {
+    final features = [
+     {"icon": Icons.explore, "title": "Explore", "screen": const ExploreTab()},
+      {"icon": Icons.analytics, "title": "Analytics", "screen": const AnalyticsScreen()},
+      {"icon": Icons.schedule, "title": "Scheduling", "screen": const EnergySchedulingScreen()},
+      {"icon": Icons.settings, "title": "Settings", "screen": const EnergySettingScreen()},
+     
+     
+    ];
+
+    return features.map((feature) {
+      
+      return Container(
+       
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withAlpha(50),
+          borderRadius: BorderRadius.circular(15),
         ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text('12 AM', style: TextStyle(color: Colors.white54, fontSize: 12)),
-            Text('3 AM', style: TextStyle(color: Colors.white54, fontSize: 12)),
-            Text('6 AM', style: TextStyle(color: Colors.white54, fontSize: 12)),
-            Text('9 AM', style: TextStyle(color: Colors.white54, fontSize: 12)),
-            Text('12 PM', style: TextStyle(color: Colors.white54, fontSize: 12)),
-            Text('3 PM', style: TextStyle(color: Colors.white54, fontSize: 12)),
-            Text('6 PM', style: TextStyle(color: Colors.white54, fontSize: 12)),
-            Text('9 PM', style: TextStyle(color: Colors.white54, fontSize: 12)),
-            Text('12 AM', style: TextStyle(color: Colors.white54, fontSize: 12)),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Peak Usage',
-                        style: TextStyle(color: Colors.white54, fontSize: 12)),
-                    SizedBox(height: 4),
-                    Text('3.8 kWh at 3:15 PM',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, color: Colors.white)),
-                  ],
-                ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(15),
+            onTap: () => selectFeature(feature["title"] as String, feature["screen"] as Widget),
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Row(
+                children: [
+                  Icon(feature["icon"] as IconData, color: Colors.tealAccent),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Text(
+                      feature["title"] as String,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Lowest Usage',
-                        style: TextStyle(color: Colors.white54, fontSize: 12)),
-                    SizedBox(height: 4),
-                    Text('0.8 kWh at 4:00 AM',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, color: Colors.white)),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-
-// 🔹 Filter Button for Energy Chart (Dark Gradient Style)
-Widget _filterButton(String label, {bool isActive = false}) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-    decoration: BoxDecoration(
-      gradient: isActive
-          ? const LinearGradient(
-              colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
-          : const LinearGradient(
-              colors: [Color(0xFF2c3e50), Color(0xFF1c2833)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Text(
-      label,
-      style: TextStyle(
-        color: isActive ? Colors.white : Colors.white70,
-        fontWeight: FontWeight.bold,
-        fontSize: 12,
-      ),
-    ),
-  );
-}
-// 🔹 Connected Devices Section
-Widget _connectedDevicesSection() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        'Connected Devices',
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-      ),
-      const SizedBox(height: 12),
-      _deviceTile(Icons.lightbulb, 'Smart Light', 'Living Room - Online'),
-      const SizedBox(height: 8),
-      _deviceTile(Icons.ac_unit, 'Air Conditioner', 'Bedroom - Offline'),
-      const SizedBox(height: 8),
-      _deviceTile(Icons.tv, 'Smart TV', 'Living Room - Online'),
-    ],
-  );
-}
-
-Widget _deviceTile(IconData icon, String title, String status) {
-  return Container(
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      gradient: const LinearGradient(
-        colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(
-      children: [
-        Icon(icon, color: Colors.tealAccent),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.white)),
-              Text(status,
-                  style: const TextStyle(
-                      fontSize: 12, color: Colors.white70)),
-            ],
           ),
         ),
-      ],
-    ),
-  );
-}
-
-// 🔹 Energy Tips Section
-Widget _energyTipsSection() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        'Energy Savings Tips',
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-      ),
-      const SizedBox(height: 12),
-      _tipTile(Icons.check_circle, 'Optimize AC Usage', 'Set to 24°C could save 15%'),
-      const SizedBox(height: 8),
-      _tipTile(Icons.schedule, 'Solar Power Hours', 'Use heavy appliances 10AM - 2PM'),
-    ],
-  );
-}
-
-Widget _tipTile(IconData icon, String title, String subtitle) {
-  return Container(
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      gradient: const LinearGradient(
-        colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(
-      children: [
-        Icon(icon, color: Colors.tealAccent),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.white)),
-              Text(subtitle,
-                  style: const TextStyle(
-                      fontSize: 12, color: Colors.white70)),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
+      );
+    }).toList();
+  }
 }

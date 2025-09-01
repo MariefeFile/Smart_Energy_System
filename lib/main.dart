@@ -4,7 +4,6 @@ import 'package:lottie/lottie.dart';
 import 'dart:ui';
 import 'screen/login.dart';
 import 'screen/user_signup.dart';
-import 'package:smartenergy_app/screen/my_admin.dart';
 
 void main() {
   runApp(const MyApp());
@@ -122,29 +121,19 @@ class _HomeState extends State<Home> {
                     height: 250,
                   ),
                   const SizedBox(height: 8),
-                  // ✅ Double-tap to go to AdminScreen
-                  GestureDetector(
-                    onDoubleTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SmartEnergyDashboard(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Welcome Back!',
-                      style: TextStyle(
-                        fontSize: 30,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
+                  // ✅ Plain text (no double-tap)
+                  const Text(
+                    'Welcome Back!',
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
                     ),
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    'Enter personal details to your\nuser account',
+                    ' We are delighted to have you here. Please enter personal details to your\nuser account.. If you need any assistance feel free to reach out.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
