@@ -130,7 +130,7 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
           : Colors.white.withValues(alpha: 0.8),
       elevation: 0,
       title: const Text(
-        'Profile',
+        'Smart Energy System',
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
       leading: const Icon(Icons.add, color: Colors.teal),
@@ -161,6 +161,7 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
 
   Widget _buildProfileCard() {
     return Container(
+      
       margin: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -179,6 +180,7 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
         padding: const EdgeInsets.all(25),
         child: Column(
           children: [
+            
             // Profile Header
             Row(
               children: [
@@ -207,6 +209,8 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+
+                      
                       const Text(
                         'Marie Fe Tapales',
                         style: TextStyle(

@@ -85,7 +85,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
     const SizedBox(width: 16),
     const Expanded(
       child: Text(
-        'Explore More',
+        'Smart Energy System',
         style: TextStyle(
           color: Colors.black87,
           fontWeight: FontWeight.bold,
@@ -126,6 +126,18 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       children: [
                         // Search + Chatbot
+
+                        const Text(
+                        'Explore More',
+                        style: TextStyle(
+                         
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                         Row(
                           children: [
                             Expanded(

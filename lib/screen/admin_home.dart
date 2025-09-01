@@ -152,6 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: Column(
                     children: [
                       const SizedBox(height: 16),
+                      
                       Row(
                         children: [
                           Expanded(child: _currentEnergyCard()),

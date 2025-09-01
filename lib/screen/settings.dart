@@ -263,7 +263,7 @@ Widget _buildHeader() {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 40), // Adjust this value to move the text down
+          padding: const EdgeInsets.only(top: 60), // Adjust this value to move the text down
           child: const Text(
             'Settings',
             style: TextStyle(

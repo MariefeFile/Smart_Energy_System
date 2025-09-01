@@ -256,6 +256,8 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
+                  
                   // Eco Tip
                   Container(
                     margin: const EdgeInsets.only(bottom: 16),
@@ -360,7 +362,7 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
                     const SizedBox(width: 16),
                     const Expanded(
                       child: Text(
-                        'Energy Scheduling',
+                        'Smart Energy System',
                         style: TextStyle(
                           color: Colors.black87,
                           fontWeight: FontWeight.bold,
@@ -451,6 +453,8 @@ Widget _buildTaskCard(Map<String, dynamic> task, int index) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
+              
               Text(task["device"],
                   style: const TextStyle(
                       fontSize: 15,
