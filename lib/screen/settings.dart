@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-//import '../main.dart';
 import 'admin_home.dart';
 import 'explore.dart';
 import 'analytics.dart';
@@ -20,8 +19,11 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
   double powerSavingLevel = 0.6;
   bool _isDarkMode = false;
   int _currentIndex = 4; // Settings tab index
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late AnimationController _profileController;
+  late Animation<Offset> _profileSlideAnimation;
 
   @override
   void initState() {
@@ -30,20 +32,36 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _animationController.forward();
+
+    _profileController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _profileSlideAnimation = Tween<Offset>(
+      begin: const Offset(0.2, -0.2),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _profileController, curve: Curves.easeOutBack),
+    );
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _profileController.dispose();
     super.dispose();
+  }
+
+  void _toggleProfile() {
+    if (_profileController.isCompleted) {
+      _profileController.reverse();
+    } else {
+      _profileController.forward();
+    }
   }
 
   String get powerSavingText {
@@ -88,9 +106,9 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
   }
 
   void _navigateToMain() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const EnergySettingScreen()),
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
     );
   }
 
@@ -98,50 +116,36 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
     return BottomNavigationBar(
       currentIndex: _currentIndex,
       selectedItemColor: Colors.teal,
-     unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-      backgroundColor: Colors.black.withValues(alpha: 0.4),
+      unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
+      backgroundColor: Colors.black.withOpacity(0.4),
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
       onTap: (index) {
         if (index == 0) {
           Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
+              context, MaterialPageRoute(builder: (_) => const HomeScreen()));
         } else if (index == 1) {
           Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const ExploreTab()),
-          );
+              context, MaterialPageRoute(builder: (_) => const ExploreTab()));
         } else if (index == 2) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const AnalyticsScreen()),
-          );
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (_) => const AnalyticsScreen()));
         } else if (index == 3) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const EnergySchedulingScreen()),
-          );
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (_) => const EnergySchedulingScreen()));
         } else if (index == 4) {
-          // Already on Settings page
           setState(() {
             _currentIndex = index;
           });
         } else if (index == 5) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const EnergyProfileScreen()),
-          );
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (_) => const EnergyProfileScreen()));
         }
       },
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
         BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.show_chart),
-          label: 'Analytics',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
         BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
@@ -154,15 +158,13 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
     return Scaffold(
       body: Stack(
         children: [
+          // Background & main content
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1a2332),
-                  Color(0xFF0f1419),
-                ],
+                colors: [Color(0xFF1a2332), Color(0xFF0f1419)],
               ),
             ),
             child: SafeArea(
@@ -182,7 +184,7 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
                       _buildDeviceManagement(),
                       const SizedBox(height: 40),
                       _buildPreferences(),
-                      const SizedBox(height: 100), // Extra space for bottom nav
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
@@ -198,13 +200,12 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
               child: Container(
                 height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: Colors.white.withOpacity(0.8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2)),
                   ],
                 ),
                 child: Row(
@@ -238,7 +239,7 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
                       },
                     ),
                     GestureDetector(
-                      onTap: _navigateToProfileSettings,
+                      onTap: _toggleProfile,
                       child: const CircleAvatar(
                         backgroundColor: Colors.teal,
                         child: Icon(Icons.person, color: Colors.white),
@@ -250,34 +251,120 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
               ),
             ),
           ),
+          // Profile Popover
+          Positioned(
+            top: 70,
+            right: 12,
+            child: FadeTransition(
+              opacity: _profileController,
+              child: SlideTransition(
+                position: _profileSlideAnimation,
+                child: ScaleTransition(
+                  scale: _profileController,
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    width: 220,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(150),
+                          blurRadius: 10,
+                          offset: const Offset(2, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Profile',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.teal,
+                          child: Icon(Icons.person, size: 30, color: Colors.white),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Marie Fe Tapales',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'marie@example.com',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        const SizedBox(height: 12),
+                         InkWell(
+                          onTap: () {
+                            _profileController.reverse();
+                            Future.delayed(const Duration(milliseconds: 300), () {
+                              if (!mounted) return;
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          const EnergyProfileScreen()));
+                            });
+                          },
+                          child: const Text('View Profile',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                      
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: _profileController.reverse,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal,
+                            minimumSize: const Size.fromHeight(36),
+                          ),
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
-Widget _buildHeader() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 60), // Adjust this value to move the text down
-          child: const Text(
-            'Settings',
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.w300,
-              color: Colors.white,
-            ),
-          ),
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 80),
+      child: const Text(
+        'Settings',
+        style: TextStyle(
+          fontSize: 30,
+          fontWeight: FontWeight.w300,
+          color: Colors.white,
         ),
-        const SizedBox(width: 24, height: 24), // Profile icon space
-      ],
-    ),
-  );
-}
+      ),
+    );
+  }
 
   Widget _buildEnergyUsage() {
     return Container(
@@ -289,7 +376,7 @@ Widget _buildHeader() {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -302,6 +389,7 @@ Widget _buildHeader() {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                
                 Text(
                   "Today's Energy Usage",
                   style: TextStyle(
@@ -392,7 +480,6 @@ Widget _buildHeader() {
               setState(() {
                 smartScheduling = value;
               });
-              // Navigate to schedule page when enabled
               if (value) {
                 _navigateToSchedule();
               }
@@ -451,20 +538,8 @@ Widget _buildHeader() {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Low',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[500],
-                ),
-              ),
-              Text(
-                'High',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[500],
-                ),
-              ),
+              Text('Low', style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+              Text('High', style: TextStyle(fontSize: 14, color: Colors.grey[500])),
             ],
           ),
         ),
@@ -491,22 +566,14 @@ Widget _buildHeader() {
           icon: Icons.devices,
           iconColor: const Color(0xFF3b82f6),
           title: 'Connected Devices',
-          trailing: const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-            size: 24,
-          ),
+          trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 24),
           onTap: _navigateToConnectedDevices,
         ),
         _buildSettingItem(
           icon: Icons.add,
           iconColor: const Color(0xFF10b981),
           title: 'Add New Device',
-          trailing: const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-            size: 24,
-          ),
+          trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 24),
           onTap: _navigateToAddDevice,
         ),
       ],
@@ -523,33 +590,21 @@ Widget _buildHeader() {
           icon: Icons.palette,
           iconColor: const Color(0xFF06b6d4),
           title: 'Theme & Units',
-          trailing: const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-            size: 24,
-          ),
+          trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 24),
           onTap: _navigateToThemeSettings,
         ),
         _buildSettingItem(
           icon: Icons.person,
           iconColor: const Color(0xFF8b5cf6),
           title: 'Profile Settings',
-          trailing: const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-            size: 24,
-          ),
+          trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 24),
           onTap: _navigateToProfileSettings,
         ),
         _buildSettingItem(
           icon: Icons.home,
           iconColor: const Color(0xFF10b981),
           title: 'Back to Home',
-          trailing: const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-            size: 24,
-          ),
+          trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 24),
           onTap: _navigateToMain,
         ),
       ],
@@ -579,13 +634,8 @@ Widget _buildHeader() {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 18),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: const Color(0xFF1e293b),
-              width: 1,
-            ),
-          ),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Color(0xFF1e293b), width: 1)),
         ),
         child: Row(
           children: [
@@ -596,21 +646,14 @@ Widget _buildHeader() {
                 borderRadius: BorderRadius.circular(8),
                 color: iconColor,
               ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 18,
-              ),
+              child: Icon(icon, color: Colors.white, size: 18),
             ),
             const SizedBox(width: 15),
             Expanded(
               child: Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w400,
-                ),
+                    fontSize: 18, color: Colors.white, fontWeight: FontWeight.w400),
               ),
             ),
             if (trailing != null) trailing,

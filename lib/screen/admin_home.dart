@@ -7,7 +7,6 @@ import 'profile.dart';
 
 class HomeScreen extends StatefulWidget {
   final int initialIndex;
-
   const HomeScreen({super.key, this.initialIndex = 0});
 
   @override
@@ -17,10 +16,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late int _currentIndex;
   bool _isDarkMode = false;
-
   late AnimationController _sidebarController;
   late AnimationController _overlayController;
-
+  late AnimationController _profileController;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _fadeAnimation;
 
@@ -29,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
     _currentIndex = widget.initialIndex;
 
+    // Sidebar animation
     _sidebarController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
@@ -38,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _sidebarController, curve: Curves.easeInOut));
 
+    // Overlay fade animation
     _overlayController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -45,12 +45,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _overlayController, curve: Curves.easeInOut),
     );
+
+    // Profile pop-out animation
+    _profileController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
   }
 
   @override
   void dispose() {
     _sidebarController.dispose();
     _overlayController.dispose();
+    _profileController.dispose();
     super.dispose();
   }
 
@@ -69,6 +76,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _closeFeatures();
     } else {
       _openFeatures();
+    }
+  }
+
+  void _openProfile() {
+    _profileController.forward();
+  }
+
+  void _closeProfile() {
+    _profileController.reverse();
+  }
+
+  void _toggleProfile() {
+    if (_profileController.isCompleted) {
+      _closeProfile();
+    } else {
+      _openProfile();
     }
   }
 
@@ -95,7 +118,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-
           // Main content
           Column(
             children: [
@@ -115,10 +137,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: Row(
                     children: [
                       const SizedBox(width: 16),
-                      Expanded(
+                      const Expanded(
                         child: Text(
                           'Smart Energy System',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.black87,
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
@@ -137,9 +159,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           });
                         },
                       ),
-                      const CircleAvatar(
-                        backgroundColor: Colors.teal,
-                        child: Icon(Icons.person, color: Colors.white),
+                      // Profile avatar
+                      GestureDetector(
+                        onTap: _toggleProfile,
+                        child: const CircleAvatar(
+                          backgroundColor: Colors.teal,
+                          child: Icon(Icons.person, color: Colors.white),
+                        ),
                       ),
                       const SizedBox(width: 12),
                     ],
@@ -152,7 +178,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: Column(
                     children: [
                       const SizedBox(height: 16),
-                      
                       Row(
                         children: [
                           Expanded(child: _currentEnergyCard()),
@@ -172,8 +197,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ],
           ),
-
-          // Overlay
+          // Overlay for sidebar
           IgnorePointer(
             ignoring: _sidebarController.status != AnimationStatus.completed,
             child: FadeTransition(
@@ -184,7 +208,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-
           // Sidebar
           SlideTransition(
             position: _slideAnimation,
@@ -202,23 +225,99 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-    const SizedBox(height: 80), // small space from top
-    const Text(
-      'Energy Features',
-      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.white),
-    ),
-    const SizedBox(height: 20),
-    Expanded(child: ListView(children: _buildFeaturesList())),
-  ],
-),
-
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 80),
+                      const Text(
+                        'Energy Features',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.white),
+                      ),
+                      const SizedBox(height: 20),
+                      Expanded(child: ListView(children: _buildFeaturesList())),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-
+          // Profile Panel (pop out from person icon)
+          Align(
+            alignment: Alignment.topRight,
+            child: FadeTransition(
+              opacity: _profileController,
+              child: ScaleTransition(
+                scale: _profileController,
+                alignment: Alignment.topRight,
+                child: Container(
+                  margin: const EdgeInsets.only(top: 70, right: 12),
+                  width: 220,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(150),
+                        blurRadius: 10,
+                        offset: const Offset(2, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Profile',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+                      ),
+                      const SizedBox(height: 12),
+                      const CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.teal,
+                        child: Icon(Icons.person, size: 30, color: Colors.white),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Marie Fe Tapales',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text('marie@example.com', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      const SizedBox(height: 12),
+                      InkWell(
+                        onTap: () {
+                          _closeProfile(); // close the popover first
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            if (!mounted) return;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const EnergyProfileScreen()),
+                            );
+                          });
+                        },
+                        child: const Text(
+                          'View Profile',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: _closeProfile,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal,
+                            minimumSize: const Size.fromHeight(36)),
+                        child: const Text('Close'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
           // Floating "Open Features" Button (bottom-left)
           Positioned(
             top: 40,
@@ -370,14 +469,108 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Energy Consumption', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
+          // Header with time period buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Energy Consumption', 
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
+              Row(
+                children: [
+                  _timePeriodButton('Today', true),
+                  const SizedBox(width: 8),
+                  _timePeriodButton('Week', false),
+                  const SizedBox(width: 8),
+                  _timePeriodButton('Month', false),
+                ],
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
+          // Graph area
           Container(
             height: 120,
             decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8)),
             child: const Center(child: Text('Graph Placeholder', style: TextStyle(color: Colors.white70))),
           ),
+          const SizedBox(height: 12),
+          // Time axis
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text('12 AM', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text('3 AM', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text('6 AM', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text('9 AM', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text('12 PM', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text('3 PM', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text('6 PM', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text('9 PM', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text('12 AM', style: TextStyle(color: Colors.white70, fontSize: 12)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Peak and Lowest usage cards
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(25),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('Peak Usage', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      SizedBox(height: 4),
+                      Text('3.8 kWh at 3:15 PM', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(25),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('Lowest Usage', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      SizedBox(height: 4),
+                      Text('0.8 kWh at 4:00 AM', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+
+  // Helper method for time period buttons
+  Widget _timePeriodButton(String label, bool isSelected) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.teal : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Colors.white : Colors.white70,
+          fontSize: 12,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
       ),
     );
   }
@@ -462,18 +655,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   List<Widget> _buildFeaturesList() {
     final features = [
-     {"icon": Icons.explore, "title": "Explore", "screen": const ExploreTab()},
+      {"icon": Icons.explore, "title": "Explore", "screen": const ExploreTab()},
       {"icon": Icons.analytics, "title": "Analytics", "screen": const AnalyticsScreen()},
       {"icon": Icons.schedule, "title": "Scheduling", "screen": const EnergySchedulingScreen()},
       {"icon": Icons.settings, "title": "Settings", "screen": const EnergySettingScreen()},
-     
-     
     ];
 
     return features.map((feature) {
-      
       return Container(
-       
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: Colors.white.withAlpha(50),

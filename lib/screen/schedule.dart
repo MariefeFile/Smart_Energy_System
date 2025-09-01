@@ -13,11 +13,52 @@ class EnergySchedulingScreen extends StatefulWidget {
       _EnergySchedulingScreenState();
 }
 
-class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
+class _EnergySchedulingScreenState extends State<EnergySchedulingScreen>
+    with TickerProviderStateMixin {
   bool _isDarkMode = false;
   int _currentIndex = 3;
 
-  // 🔹 Store scheduled tasks
+  late AnimationController _profileController;
+  late Animation<Offset> _profileSlideAnimation;
+  late Animation<double> _profileScaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _profileController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _profileSlideAnimation = Tween<Offset>(
+      begin: const Offset(0.2, -0.2),
+      end: Offset.zero,
+    ).animate(
+        CurvedAnimation(parent: _profileController, curve: Curves.easeOutBack));
+
+    _profileScaleAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(
+        CurvedAnimation(parent: _profileController, curve: Curves.easeOutBack));
+  }
+
+  @override
+  void dispose() {
+    _profileController.dispose();
+    super.dispose();
+  }
+
+  void _toggleProfile() {
+    if (_profileController.status == AnimationStatus.dismissed) {
+      _profileController.forward();
+    } else {
+      _profileController.reverse();
+    }
+  }
+
+  // Scheduled tasks
   final List<Map<String, dynamic>> _scheduledTasks = [
     {
       "device": "Air Conditioner",
@@ -42,7 +83,6 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
     },
   ];
 
-  // Dropdown values
   String? selectedHour;
   String? selectedMinute;
   String? selectedDevice;
@@ -51,41 +91,40 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
       List.generate(24, (index) => index.toString().padLeft(2, '0'));
   final List<String> minutes =
       List.generate(60, (index) => index.toString().padLeft(2, '0'));
-  final List<String> devices = [
-    "Air Conditioner",
-    "Washing Machine",
-    "Lights",
-    "Fan"
-  ];
+  final List<String> devices = ["Air Conditioner", "Washing Machine", "Lights", "Fan"];
 
-  // 🔹 Navigation
+  // Bottom nav
   void _onTabTapped(int index) {
     if (index == _currentIndex) return;
-
     setState(() => _currentIndex = index);
 
-    if (index == 0) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-    } else if (index == 1) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const ExploreTab()));
-    } else if (index == 2) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const AnalyticsScreen()));
-    } else if (index == 3) {
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (_) => const EnergySchedulingScreen()));
-    } else if (index == 4) {
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (_) => const EnergySettingScreen()));
-    } else if (index == 5) {
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (_) => const EnergyProfileScreen()));
+    Widget page;
+    switch (index) {
+      case 0:
+        page = const HomeScreen();
+        break;
+      case 1:
+        page = const ExploreTab();
+        break;
+      case 2:
+        page = const AnalyticsScreen();
+        break;
+      case 3:
+        page = const EnergySchedulingScreen();
+        break;
+      case 4:
+        page = const EnergySettingScreen();
+        break;
+      case 5:
+        page = const EnergyProfileScreen();
+        break;
+      default:
+        page = const HomeScreen();
     }
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => page));
   }
 
-  // 🔹 Add new task dialog
+  // Add task
   void _addTask() async {
     await showDialog(
       context: context,
@@ -127,9 +166,7 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
             ],
           ),
           actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel")),
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
             ElevatedButton(
               onPressed: () {
                 if (selectedDevice != null &&
@@ -145,7 +182,6 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
                     });
                   });
                   Navigator.pop(context);
-
                   selectedDevice = null;
                   selectedHour = null;
                   selectedMinute = null;
@@ -159,7 +195,6 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
     );
   }
 
-  // 🔹 Edit task dialog
   void _editTask(int index) {
     final task = _scheduledTasks[index];
 
@@ -170,7 +205,7 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
           title: const Text("Edit Task"),
           content: Column(
@@ -199,10 +234,7 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
             ElevatedButton(
               onPressed: () {
                 setState(() {
@@ -235,35 +267,28 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 🔹 Background
+          // Background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1a2332),
-                  Color(0xFF0f1419),
-                ],
+                colors: [Color(0xFF1a2332), Color(0xFF0f1419)],
               ),
             ),
           ),
-
-          // 🔹 Foreground Content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  
-                  // Eco Tip
+                  // Tip
                   Container(
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.teal.shade50.withValues(alpha: 0.5),
+                      color: Colors.teal.withAlpha(50),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -277,11 +302,10 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
                                 color: Colors.teal.shade900,
                                 fontWeight: FontWeight.w600),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
-
                   if (_scheduledTasks.isNotEmpty) ...[
                     Text("Next Scheduled Task",
                         style: TextStyle(
@@ -291,7 +315,6 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
                     const SizedBox(height: 8),
                     _buildTaskCard(_scheduledTasks[0], 0),
                   ],
-
                   const SizedBox(height: 24),
                   const Text("Upcoming Tasks",
                       style: TextStyle(
@@ -315,7 +338,6 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
                             )
                           ],
                   ),
-
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
@@ -331,13 +353,13 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
                       child: const Text("Add Task",
                           style: TextStyle(fontSize: 16, color: Colors.white)),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
           ),
 
-          // 🔹 Top AppBar
+          // Top AppBar
           Positioned(
             top: 0,
             left: 0,
@@ -346,13 +368,12 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
               child: Container(
                 height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: Colors.white.withAlpha(200),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
+                        color: Colors.black.withAlpha(25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2)),
                   ],
                 ),
                 child: Row(
@@ -385,12 +406,102 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
                         });
                       },
                     ),
-                    const CircleAvatar(
-                      backgroundColor: Colors.teal,
-                      child: Icon(Icons.person, color: Colors.white),
+                    GestureDetector(
+                      onTap: _toggleProfile,
+                      child: const CircleAvatar(
+                        backgroundColor: Colors.teal,
+                        child: Icon(Icons.person, color: Colors.white),
+                      ),
                     ),
                     const SizedBox(width: 12),
                   ],
+                ),
+              ),
+            ),
+          ),
+
+          // Profile Popover
+          Positioned(
+            top: 70,
+            right: 12,
+            child: FadeTransition(
+              opacity: _profileController,
+              child: SlideTransition(
+                position: _profileSlideAnimation,
+                child: ScaleTransition(
+                  scale: _profileScaleAnimation,
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    width: 220,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(150),
+                          blurRadius: 10,
+                          offset: const Offset(2, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Profile',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white)),
+                        const SizedBox(height: 12),
+                        const CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.teal,
+                          child: Icon(Icons.person, size: 30, color: Colors.white),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text('Marie Fe Tapales',
+                            style: TextStyle(
+                                color: Colors.white, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        const Text('marie@example.com',
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 12)),
+                        const SizedBox(height: 12),
+                        InkWell(
+                          onTap: () {
+                            _profileController.reverse();
+                            Future.delayed(const Duration(milliseconds: 300), () {
+                              if (!mounted) return;
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          const EnergyProfileScreen()));
+                            });
+                          },
+                          child: const Text('View Profile',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: _profileController.reverse,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal,
+                            minimumSize: const Size.fromHeight(36),
+                          ),
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -401,14 +512,13 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
         unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-        backgroundColor: Colors.black.withValues(alpha: 0.4),
+        backgroundColor: Colors.black.withAlpha(100),
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: "Energy"),
           BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.analytics), label: "Analytics"),
+          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: "Analytics"),
           BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Schedule"),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
@@ -417,100 +527,90 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen> {
     );
   }
 
-  // 🔹 Task Card Widget
-// 🔹 Task Card Widget with Gradient Background
-Widget _buildTaskCard(Map<String, dynamic> task, int index) {
-  return Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-    decoration: BoxDecoration(
-      gradient: const LinearGradient(
-        colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      borderRadius: BorderRadius.circular(14),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.25),
-          blurRadius: 10,
-          offset: const Offset(0, 6),
+  // Task card
+  Widget _buildTaskCard(Map<String, dynamic> task, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-      ],
-    ),
-    child: Row(
-      children: [
-        // 🔵 Icon Avatar
-        CircleAvatar(
-          radius: 24,
-          backgroundColor: Colors.white.withValues(alpha: 0.1),
-          child: Icon(task["icon"], size: 22, color: Colors.tealAccent),
-        ),
-        const SizedBox(width: 12),
-
-        // 📋 Task Info
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-
-              
-              Text(task["device"],
-                  style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white)),
-              const SizedBox(height: 2),
-              Text(task["time"],
-                  style: TextStyle(color: Colors.grey[400], fontSize: 13)),
-              const SizedBox(height: 4),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text("Energy: ${task["energy"]}",
-                    style: const TextStyle(
-                        fontSize: 11, color: Colors.white)),
-              ),
-            ],
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(64),
+            blurRadius: 10,
+            offset: const Offset(0, 6),
           ),
-        ),
-
-        // 💰 Cost + Actions
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(task["cost"],
-                style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white)),
-            Row(
-              mainAxisSize: MainAxisSize.min,
+        ],
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: Colors.white.withAlpha(25),
+            child: Icon(task["icon"], size: 22, color: Colors.tealAccent),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.orange, size: 20),
-                  onPressed: () => _editTask(index),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-                const SizedBox(width: 6),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                  onPressed: () => _removeTask(index),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                Text(task["device"],
+                    style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white)),
+                const SizedBox(height: 2),
+                Text(task["time"],
+                    style: TextStyle(color: Colors.grey[400], fontSize: 13)),
+                const SizedBox(height: 4),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(25),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text("Energy: ${task["energy"]}",
+                      style: const TextStyle(fontSize: 11, color: Colors.white)),
                 ),
               ],
-            )
-          ],
-        )
-      ],
-    ),
-  );
-}
-
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(task["cost"],
+                  style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white)),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.orange, size: 20),
+                    onPressed: () => _editTask(index),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 6),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                    onPressed: () => _removeTask(index),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              )
+            ],
+          )
+        ],
+      ),
+    );
+  }
 }
