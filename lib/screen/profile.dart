@@ -263,13 +263,13 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
               children: [
                 Expanded(
                   child: Column(
-                    children: [
-                      _buildStatItem('Current Energy Usage', '350'),
-                      const SizedBox(height: 15),
-                      _buildStatItem('Monthly Savings', '\$25'),
-                      const SizedBox(height: 15),
-                      _buildStatItem('Carbon Reduction', '120'),
-                    ],
+                   children: [
+          _buildStatItem('Current Energy Usage', '350'),
+          const SizedBox(height: 15),
+          _buildStatItem('Monthly Savings', '₱25'), // ✅ Peso sign here
+          const SizedBox(height: 15),
+          _buildStatItem('Carbon Reduction', '120'),
+        ],
                   ),
                 ),
                 const SizedBox(width: 30),

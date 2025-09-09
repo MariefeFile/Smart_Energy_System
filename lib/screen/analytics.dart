@@ -139,12 +139,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
                       const SizedBox(height: 16),
                       Row(
-                        children: [
-                          Expanded(child: summaryCard('Total Consumption', '167.9 kWh', '+4.2%')),
-                          const SizedBox(width: 12),
-                          Expanded(child: summaryCard('Cost', '\$31.58', '+16.5%')),
-                        ],
-                      ),
+  children: [
+    Expanded(child: summaryCard('Total Consumption', '167.9 kWh', '+4.2%')),
+    const SizedBox(width: 12),
+    Expanded(child: summaryCard('Cost', '₱31.58', '+16.5%')),
+  ],
+),
                       const SizedBox(height: 24),
                       const Text('Energy Usage',
                           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
