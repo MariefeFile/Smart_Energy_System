@@ -4,7 +4,7 @@ import 'explore.dart';
 import 'schedule.dart';
 import 'settings.dart';
 import 'profile.dart';
-//import 'connected_devices.dart';
+import 'connected_devices.dart';
 
 
 
@@ -579,20 +579,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _connectedDevicesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Connected Devices', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        _deviceTile(Icons.lightbulb, 'Smart Light', 'Living Room - Online'),
-        const SizedBox(height: 8),
-        _deviceTile(Icons.ac_unit, 'Air Conditioner', 'Bedroom - Offline'),
-        const SizedBox(height: 8),
-        _deviceTile(Icons.tv, 'Smart TV', 'Living Room - Online'),
-      ],
-    );
-  }
+ Widget _connectedDevicesSection() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text('Connected Devices', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      const SizedBox(height: 12),
+      ...connectedDevices.map((device) => _deviceTile(device.icon, device.name, device.status)).toList(),
+    ],
+  );
+}
 
   Widget _deviceTile(IconData icon, String title, String status) {
     return Container(
