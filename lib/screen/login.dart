@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'admin_home.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'theadmin.dart'; 
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -113,6 +114,33 @@ Text(
                         child: Text(isLogin ? 'Login' : 'Sign Up'),
                       ),
                     ),
+const SizedBox(height: 20),
+
+SizedBox(
+  width: double.infinity,
+  child: ElevatedButton.icon(
+    onPressed: () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MyAdminScreen(), // ✅ change if you have admin_home.dart screen
+        ),
+      );
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color.fromARGB(255, 42, 164, 142), // Admin color
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
+    icon: const Icon(Icons.admin_panel_settings, color: Colors.white),
+    label: const Text(
+      'Admin Login',
+      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    ),
+  ),
+),
                     const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -137,6 +165,9 @@ Text(
                       ],
                     ),
                     const SizedBox(height: 20),
+
+
+                    
                     const Text(
                       'Or continue with',
                       style: TextStyle(color: Colors.white70),

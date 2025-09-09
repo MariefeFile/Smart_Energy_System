@@ -80,10 +80,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                 child: Container(
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -249,7 +249,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
         unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-        backgroundColor: Colors.black.withOpacity(0.4),
+        backgroundColor: Colors.black.withValues(alpha: 0.4),
         currentIndex: 2,
         onTap: (index) {
           if (index == 2) return;
@@ -294,7 +294,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(title, style: TextStyle(fontSize: 16, color: Colors.grey[400], fontWeight: FontWeight.w400)),
@@ -313,7 +313,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 6))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 6))],
       ),
       child: Row(children: [
         Container(width: 40, height: 40, decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: Colors.white, size: 22)),
@@ -322,7 +322,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
             const SizedBox(height: 6),
-            LinearProgressIndicator(value: percent, color: const Color(0xFF10b981), backgroundColor: Colors.white.withOpacity(0.2)),
+            LinearProgressIndicator(value: percent, color: const Color(0xFF10b981), backgroundColor: Colors.white.withValues(alpha: 0.2)),
           ]),
         ),
         const SizedBox(width: 16),
@@ -356,7 +356,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             isCurved: true,
             color: Colors.white,
             dotData: FlDotData(show: true),
-            belowBarData: BarAreaData(show: true, color: Colors.white.withOpacity(0.25)),
+            belowBarData: BarAreaData(show: true, color: Colors.white.withValues(alpha: 0.25)),
           ),
         ],
       ),

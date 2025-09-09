@@ -4,6 +4,8 @@ import 'explore.dart';
 import 'analytics.dart';
 import 'schedule.dart';
 import 'settings.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'login.dart';
 
 class EnergyProfileScreen extends StatefulWidget {
   const EnergyProfileScreen({super.key});
@@ -447,44 +449,61 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
   }
 
   void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF1e293b),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text(
-            'Logout',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: Text(
-            'Are you sure you want to logout?',
-            style: TextStyle(color: Colors.grey[400]),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.grey[400]),
-              ),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: const Color(0xFF1e293b),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text(
+          'Logout',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Are you sure you want to logout?',
+          style: TextStyle(color: Colors.grey),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey[400]),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Add your logout logic here
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6B6B),
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Logout'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop(); // Close dialog first
+
+              // ✅ If using Google Sign-In
+              try {
+                final googleSignIn = GoogleSignIn();
+                await googleSignIn.signOut();
+              } catch (e) {
+                debugPrint("Google sign out error: $e");
+              }
+
+              // ✅ Navigate to AuthPage and clear back stack
+              if (mounted) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AuthPage()),
+                  (route) => false,
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6B6B),
+              foregroundColor: Colors.white,
             ),
-          ],
-        );
-      },
-    );
-  }
+            child: const Text('Logout'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 }

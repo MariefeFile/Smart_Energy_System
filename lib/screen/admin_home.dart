@@ -4,6 +4,9 @@ import 'explore.dart';
 import 'schedule.dart';
 import 'settings.dart';
 import 'profile.dart';
+//import 'connected_devices.dart';
+
+
 
 class HomeScreen extends StatefulWidget {
   final int initialIndex;
@@ -16,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late int _currentIndex;
   bool _isDarkMode = false;
+  bool _showGuidelines = false;
   late AnimationController _sidebarController;
   late AnimationController _overlayController;
   late AnimationController _profileController;
@@ -654,15 +658,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   List<Widget> _buildFeaturesList() {
-    final features = [
-      {"icon": Icons.explore, "title": "Explore", "screen": const ExploreTab()},
-      {"icon": Icons.analytics, "title": "Analytics", "screen": const AnalyticsScreen()},
-      {"icon": Icons.schedule, "title": "Scheduling", "screen": const EnergySchedulingScreen()},
-      {"icon": Icons.settings, "title": "Settings", "screen": const EnergySettingScreen()},
-    ];
+  // Normal features with screens
+  final features = [
+    {"icon": Icons.explore, "title": "Explore", "screen": const ExploreTab()},
+    {"icon": Icons.analytics, "title": "Analytics", "screen": const AnalyticsScreen()},
+    {"icon": Icons.schedule, "title": "Scheduling", "screen": const EnergySchedulingScreen()},
+    {"icon": Icons.settings, "title": "Settings", "screen": const EnergySettingScreen()},
+   
+  ];
 
-    return features.map((feature) {
-      return Container(
+  // Store widgets here
+  final List<Widget> featureWidgets = [];
+
+  // Add normal features
+  for (var feature in features) {
+    featureWidgets.add(
+      Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: Colors.white.withAlpha(50),
@@ -672,7 +683,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(15),
-            onTap: () => selectFeature(feature["title"] as String, feature["screen"] as Widget),
+           onTap: () {
+  if (feature["title"] == "Guidelines") {
+    setState(() {
+      _showGuidelines = !_showGuidelines; // ✅ toggle panel
+    });
+  } else {
+    selectFeature(feature["title"] as String, feature["screen"] as Widget);
+  }
+},
+
             child: Padding(
               padding: const EdgeInsets.all(15),
               child: Row(
@@ -682,7 +702,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   Expanded(
                     child: Text(
                       feature["title"] as String,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
@@ -690,7 +714,78 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-      );
-    }).toList();
+      ),
+    );
   }
+
+  // ✅ Guidelines dropdown button
+  featureWidgets.add(
+    Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(50),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(15),
+          onTap: () {
+            setState(() {
+              _showGuidelines = !_showGuidelines;
+            });
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Row(
+              children: [
+                const Icon(Icons.menu_book, color: Colors.tealAccent),
+                const SizedBox(width: 15),
+                const Expanded(
+                  child: Text(
+                    "Guidelines",
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white),
+                  ),
+                ),
+                Icon(
+                  _showGuidelines ? Icons.expand_less : Icons.expand_more,
+                  color: Colors.white70,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+    // ✅ Show dropdown content if expanded
+  if (_showGuidelines) {
+    featureWidgets.add(
+      Padding(
+        padding: const EdgeInsets.only(left: 40, top: 4, bottom: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Text("⚡ Save energy by turning off unused appliances.",
+                style: TextStyle(color: Colors.white70, fontSize: 14)),
+            SizedBox(height: 4),
+            Text("🌞 Use natural light during daytime.",
+                style: TextStyle(color: Colors.white70, fontSize: 14)),
+            SizedBox(height: 4),
+            Text("❄️ Optimize air conditioning usage.",
+                style: TextStyle(color: Colors.white70, fontSize: 14)),
+            SizedBox(height: 4),
+            Text("🔌 Unplug chargers when not in use.",
+                style: TextStyle(color: Colors.white70, fontSize: 14)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  return featureWidgets; // ✅ important
+}
 }

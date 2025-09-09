@@ -117,7 +117,7 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
       currentIndex: _currentIndex,
       selectedItemColor: Colors.teal,
       unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-      backgroundColor: Colors.black.withOpacity(0.4),
+      backgroundColor: Colors.black.withValues(alpha: 0.4),
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
       onTap: (index) {
@@ -200,10 +200,10 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
               child: Container(
                 height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 2)),
                   ],
@@ -376,7 +376,7 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -384,6 +384,7 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
+        
         children: [
           Expanded(
             child: Column(

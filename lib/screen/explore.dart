@@ -23,9 +23,29 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
   late Animation<Offset> _profileSlideAnimation;
   late Animation<double> _profileScaleAnimation;
 
+  // Search controller
+  final TextEditingController _searchController = TextEditingController();
+
+  // All devices
+  final List<Map<String, dynamic>> connectedDevices = [
+    {"name": "Rice Cooker", "icon": Icons.kitchen, "status": "On"},
+    {"name": "Washing Machine", "icon": Icons.local_laundry_service, "status": "Off"},
+    {"name": "TV", "icon": Icons.tv, "status": "On"},
+    {"name": "Security Camera", "icon": Icons.videocam, "status": "Active"},
+    {"name": "Smart Light", "icon": Icons.lightbulb, "status": "Off"},
+    {"name": "Thermostat", "icon": Icons.thermostat, "status": "22°C"},
+    {"name": "Cellphone", "icon": Icons.phone_android, "status": "Charging"},
+    {"name": "Electric Fan", "icon": Icons.toys, "status": "On"},
+    {"name": "Laptop", "icon": Icons.laptop, "status": "Idle"},
+  ];
+
+  // Filtered devices
+  List<Map<String, dynamic>> filteredDevices = [];
+
   @override
   void initState() {
     super.initState();
+    filteredDevices = connectedDevices; // initially show all
 
     // Fade animation for main content
     _controller = AnimationController(
@@ -51,10 +71,23 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
     ).animate(CurvedAnimation(parent: _profileController, curve: Curves.easeOutBack));
   }
 
+  // 🔎 Filter function
+  void _filterDevices(String query) {
+    final results = connectedDevices.where((device) {
+      final name = device["name"].toString().toLowerCase();
+      return name.contains(query.toLowerCase());
+    }).toList();
+
+    setState(() {
+      filteredDevices = results;
+    });
+  }
+
   @override
   void dispose() {
     _controller.dispose();
     _profileController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -164,6 +197,11 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                           children: [
                             Expanded(
                               child: TextField(
+                                controller: _searchController,
+                                onChanged: _filterDevices,
+                                textInputAction: TextInputAction.search,
+                                onSubmitted: (_) =>
+                                    FocusScope.of(context).unfocus(), // ✅ close keyboard
                                 decoration: InputDecoration(
                                   hintText: 'Search devices....',
                                   prefixIcon: const Icon(Icons.search, color: Colors.teal),
@@ -199,23 +237,46 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
 
                         const SizedBox(height: 16),
 
-                        // Quick Actions
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _quickActionButton(
-                              icon: Icons.info,
-                              label: "Guidance",
-                              onPressed: () {
+                        // Connected Devices Section (Creative Cards)
+                        const Text(
+                          'Connected Devices',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: filteredDevices.length,
+                          itemBuilder: (context, index) {
+                            final device = filteredDevices[index];
+
+                            // Determine status color
+                            Color statusColor;
+                            switch (device["status"].toString().toLowerCase()) {
+                              case "on":
+                              case "active":
+                              case "charging":
+                                statusColor = Colors.green;
+                                break;
+                              case "off":
+                                statusColor = Colors.red;
+                                break;
+                              default:
+                                statusColor = Colors.orange;
+                            }
+
+                            return GestureDetector(
+                              onTap: () {
                                 showDialog(
                                   context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Guidance: Smart Energy System'),
-                                    content: const Text(
-                                      'The Smart Energy System monitors, analyzes, '
-                                      'and optimizes electricity consumption with real-time '
-                                      'data, analytics, scheduling, and customizable settings.',
-                                    ),
+                                  builder: (_) => AlertDialog(
+                                    title: Text(device["name"]),
+                                    content: Text('Status: ${device["status"]}'),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(context),
@@ -225,9 +286,99 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                                   ),
                                 );
                               },
-                            ),
-                          ],
-                        ),
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(vertical: 6),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFF2A2F45), Color(0xFF1B1F2D)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.3),
+                                      blurRadius: 6,
+                                      offset: const Offset(2, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: LinearGradient(
+                                          colors: [Colors.tealAccent, Colors.teal],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.teal.withValues(alpha: 0.3),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Icon(device["icon"], color: Colors.white, size: 24),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            device["name"],
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: statusColor,
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              device["status"].toString(),
+                                              style: const TextStyle(
+                                                  color: Colors.white, fontSize: 12),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon:
+                                          const Icon(Icons.info_outline, color: Colors.teal),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: Text(device["name"]),
+                                            content: Text('Status: ${device["status"]}'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context),
+                                                child: const Text('Close'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        )
                       ],
                     ),
                   ),
@@ -271,19 +422,25 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                       children: [
                         const Text('Profile',
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white)),
                         const SizedBox(height: 12),
                         const CircleAvatar(
                           radius: 30,
                           backgroundColor: Colors.teal,
-                          child: Icon(Icons.person, size: 30, color: Colors.white),
+                          child: Icon(Icons.person,
+                              size: 30, color: Colors.white),
                         ),
                         const SizedBox(height: 12),
                         const Text('Marie Fe Tapales',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        const Text('marie@example.com',
-                            style: TextStyle(color: Colors.white70, fontSize: 12)),
+                        const Text('mariefe@example.com',
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 12)),
                         const SizedBox(height: 12),
                         InkWell(
                           onTap: () {
@@ -293,11 +450,14 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (_) => const EnergyProfileScreen()));
+                                      builder: (_) =>
+                                          const EnergyProfileScreen()));
                             });
                           },
                           child: const Text('View Profile',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
                         ),
                         const SizedBox(height: 8),
                         ElevatedButton(
@@ -365,24 +525,6 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
     );
   }
 
-  Widget _quickActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      icon: Icon(icon, size: 20),
-      label: Text(
-        label,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      ),
-      onPressed: onPressed,
-    );
-  }
+
+
 }
