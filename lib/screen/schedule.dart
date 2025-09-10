@@ -518,7 +518,7 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen>
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: "Energy"),
           BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
-          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: "Analytics"),
+          BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: "Analytics"),
           BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Schedule"),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),

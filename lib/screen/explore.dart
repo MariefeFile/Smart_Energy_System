@@ -23,7 +23,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
   late AnimationController _profileController;
   late Animation<Offset> _profileSlideAnimation;
   late Animation<double> _profileScaleAnimation;
-  late Animation<double> _profileFadeAnimation; // Added proper fade animation
+  late Animation<double> _profileFadeAnimation;
 
   // Search controller
   final TextEditingController _searchController = TextEditingController();
@@ -31,12 +31,11 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
   // Filtered devices
   List<ConnectedDevice> filteredDevices = List.from(connectedDevices);
 
-  // 🔎 Filter function (kept original logic, removed duplicate)
   void _filterDevices(String query) {
-   final results = connectedDevices.where((device) {
-  final name = device.name.toLowerCase();
-  return name.contains(query.toLowerCase());
-}).toList();
+    final results = connectedDevices.where((device) {
+      final name = device.name.toLowerCase();
+      return name.contains(query.toLowerCase());
+    }).toList();
     setState(() {
       filteredDevices = results;
     });
@@ -45,9 +44,8 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    filteredDevices = connectedDevices; // initially show all
+    filteredDevices = connectedDevices;
 
-    // Fade animation for main content
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -55,7 +53,6 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(_controller);
     _controller.forward();
 
-    // Profile popover animation
     _profileController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -70,7 +67,6 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
       end: 1,
     ).animate(CurvedAnimation(parent: _profileController, curve: Curves.easeOutBack));
 
-    // Proper fade animation for profile popover
     _profileFadeAnimation = CurvedAnimation(
       parent: _profileController,
       curve: Curves.easeInOut,
@@ -93,12 +89,89 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
     }
   }
 
+  // ✅ Add or Edit device dialog
+  void _showDeviceDialog({ConnectedDevice? device, int? index}) {
+    final nameController = TextEditingController(text: device?.name ?? "");
+    final statusController = TextEditingController(text: device?.status ?? "");
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(device == null ? "Add Device" : "Edit Device"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: "Device Name"),
+            ),
+            TextField(
+              controller: statusController,
+              decoration: const InputDecoration(labelText: "Status"),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+  onPressed: () {
+    if (nameController.text.isNotEmpty) {
+      setState(() {
+        if (device == null) {
+          connectedDevices.add(
+            ConnectedDevice(
+              name: nameController.text,
+              status: statusController.text,
+              icon: Icons.devices,
+              usage: 0.0,       // default value for new device
+              percent: 0.0,     // default value for new device
+            ),
+          );
+        } else {
+          connectedDevices[index!] = ConnectedDevice(
+            name: nameController.text,
+            status: statusController.text,
+            icon: device.icon,
+            usage: device.usage,       // keep previous usage
+            percent: device.percent,   // keep previous percent
+          );
+        }
+        filteredDevices = List.from(connectedDevices);
+      });
+      Navigator.pop(context);
+    }
+  },
+  child: Text(device == null ? "Add" : "Save"),
+),
+
+        ],
+      ),
+    );
+  }
+
+  // ✅ Remove device
+  void _removeDevice(int index) {
+    setState(() {
+      connectedDevices.removeAt(index);
+      filteredDevices = List.from(connectedDevices);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // ✅ Add button
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.teal,
+        onPressed: () => _showDeviceDialog(),
+        child: const Icon(Icons.add),
+      ),
+
       body: Stack(
         children: [
-          // Background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -186,7 +259,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                         ),
                         const SizedBox(height: 16),
 
-                        // Search and Chat
+                        // Search + Chat
                         Row(
                           children: [
                             Expanded(
@@ -194,8 +267,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                                 controller: _searchController,
                                 onChanged: _filterDevices,
                                 textInputAction: TextInputAction.search,
-                                onSubmitted: (_) =>
-                                    FocusScope.of(context).unfocus(),
+                                onSubmitted: (_) => FocusScope.of(context).unfocus(),
                                 decoration: InputDecoration(
                                   hintText: 'Search devices....',
                                   prefixIcon: const Icon(Icons.search, color: Colors.teal),
@@ -231,7 +303,6 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
 
                         const SizedBox(height: 16),
 
-                        // Connected Devices Section (Creative Cards)
                         const Text(
                           'Connected Devices',
                           style: TextStyle(
@@ -242,6 +313,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                         ),
                         const SizedBox(height: 12),
 
+                        // ✅ Updated device cards
                         ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
@@ -249,9 +321,8 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                           itemBuilder: (context, index) {
                             final device = filteredDevices[index];
 
-                            // Determine status color
                             Color statusColor;
-                            switch (Text(device.status).toString().toLowerCase()) {
+                            switch (device.status.toLowerCase()) {
                               case "on":
                               case "active":
                               case "charging":
@@ -264,112 +335,39 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                                 statusColor = Colors.orange;
                             }
 
-                            return GestureDetector(
-                              onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (_) => AlertDialog(
-                                    title: Text(device.name),
-                                    content: Text('Status: ${Text(device.status)}'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text('Close'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(vertical: 6),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [Color(0xFF2A2F45), Color(0xFF1B1F2D)],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withAlpha((255 * 0.3).toInt()), // fixed
-                                      blurRadius: 6,
-                                      offset: const Offset(2, 3),
-                                    ),
-                                  ],
+                            return Card(
+                              color: const Color(0xFF2A2F45),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              margin: const EdgeInsets.symmetric(vertical: 6),
+                              child: ListTile(
+                                leading: Icon(device.icon, color: Colors.teal),
+                                title: Text(
+                                  device.name,
+                                  style: const TextStyle(color: Colors.white),
                                 ),
-                                child: Row(
+                                subtitle: Text(
+                                  "Status: ${device.status}",
+                                  style: TextStyle(color: statusColor),
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: const LinearGradient(
-                                          colors: [Colors.tealAccent, Colors.teal],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.teal.withValues(alpha: 0.3), // fixed
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Icon(device.icon, color: Colors.white, size: 24),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            device.name,
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: statusColor,
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                            child: Text(
-                                              device.status.toString(),
-                                              style: const TextStyle(color: Colors.white, fontSize: 12),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                    IconButton(
+                                      icon: const Icon(Icons.edit, color: Colors.yellow),
+                                      onPressed: () => _showDeviceDialog(device: device, index: index),
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.info_outline, color: Colors.teal),
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            title: Text(device.name),
-                                            content: Text('Status: ${device.status}'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(context),
-                                                child: const Text('Close'),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
+                                      icon: const Icon(Icons.delete, color: Colors.red),
+                                      onPressed: () => _removeDevice(index),
                                     ),
                                   ],
                                 ),
                               ),
                             );
                           },
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -378,12 +376,12 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
             ),
           ),
 
-          // Profile Popover
+          // Profile Popover (unchanged)
           Positioned(
             top: 70,
             right: 12,
             child: FadeTransition(
-              opacity: _profileFadeAnimation, // fixed
+              opacity: _profileFadeAnimation,
               child: SlideTransition(
                 position: _profileSlideAnimation,
                 child: ScaleTransition(
@@ -464,16 +462,16 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
         ],
       ),
 
-      // Bottom Navigation
+      // Bottom Navigation (unchanged)
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
         unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
         backgroundColor: Colors.black.withAlpha(100),
         showUnselectedLabels: true,
-        currentIndex: 1, // Explore tab
+        currentIndex: 1,
         onTap: (index) {
-          if (index == 1) return; // Stay on Explore
+          if (index == 1) return;
           Widget page;
           switch (index) {
             case 0:

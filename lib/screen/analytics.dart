@@ -5,6 +5,7 @@ import 'package:smartenergy_app/screen/schedule.dart';
 import 'package:smartenergy_app/screen/settings.dart';
 import 'package:smartenergy_app/screen/profile.dart';
 import 'package:smartenergy_app/screen/admin_home.dart';
+import 'connected_devices.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -13,12 +14,14 @@ class AnalyticsScreen extends StatefulWidget {
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
 }
 
-class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderStateMixin {
+class _AnalyticsScreenState extends State<AnalyticsScreen>
+    with TickerProviderStateMixin {
   bool _isDarkMode = false;
 
   late AnimationController _profileController;
   late Animation<Offset> _profileSlideAnimation;
   late Animation<double> _profileScaleAnimation;
+  late Animation<double> _profileFadeAnimation; // ✅ Added fade animation
 
   @override
   void initState() {
@@ -32,12 +35,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
     _profileSlideAnimation = Tween<Offset>(
       begin: const Offset(0.2, -0.2),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _profileController, curve: Curves.easeOutBack));
+    ).animate(CurvedAnimation(
+        parent: _profileController, curve: Curves.easeOutBack));
 
-    _profileScaleAnimation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
+    _profileScaleAnimation = Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(parent: _profileController, curve: Curves.easeOutBack));
+
+    // ✅ Fix FadeTransition issue
+    _profileFadeAnimation = CurvedAnimation(
       parent: _profileController,
-      curve: Curves.easeOutBack,
-    ));
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -56,6 +64,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Calculate total usage dynamically
+    double totalUsage =
+        connectedDevices.fold(0, (sum, d) => sum + d.usage);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -105,11 +117,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.notifications, color: Colors.teal),
+                        icon:
+                            const Icon(Icons.notifications, color: Colors.teal),
                         onPressed: () {},
                       ),
                       IconButton(
-                        icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode, color: Colors.teal),
+                        icon: Icon(
+                            _isDarkMode
+                                ? Icons.dark_mode
+                                : Icons.light_mode,
+                            color: Colors.teal),
                         onPressed: () {
                           setState(() => _isDarkMode = !_isDarkMode);
                         },
@@ -136,27 +153,54 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                     children: [
                       const SizedBox(height: 20),
                       const Text('Analytics',
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                          style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
                       const SizedBox(height: 16),
+
+                      // ✅ Dynamically show total kWh instead of hardcoded
                       Row(
-  children: [
-    Expanded(child: summaryCard('Total Consumption', '167.9 kWh', '+4.2%')),
-    const SizedBox(width: 12),
-    Expanded(child: summaryCard('Cost', '₱31.58', '+16.5%')),
-  ],
-),
+                        children: [
+                          Expanded(child: summaryCard(
+                              'Total Consumption',
+                              '${totalUsage.toStringAsFixed(1)} kWh',
+                              '+4.2%')),
+                          const SizedBox(width: 12),
+                          Expanded(child: summaryCard(
+                              'Cost',
+                              '₱${(totalUsage * 0.188).toStringAsFixed(2)}', // assume ₱0.188 per kWh
+                              '+16.5%')),
+                        ],
+                      ),
+
                       const SizedBox(height: 24),
                       const Text('Energy Usage',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
                       const SizedBox(height: 12),
                       SizedBox(height: 200, child: lineChart()),
                       const SizedBox(height: 24),
                       const Text('Usage Breakdown',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
                       const SizedBox(height: 12),
-                      breakdownTile(Icons.ac_unit, 'Cooling', '78.1 kWh', 0.46),
-                      breakdownTile(Icons.lightbulb_outline, 'Lighting', '58.7 kWh', 0.34),
-                      breakdownTile(Icons.power, 'Other', '33.8 kWh', 0.20),
+
+                      // ✅ Dynamic breakdown
+                      Column(
+                        children: connectedDevices.map((device) {
+                          double percent =
+                              totalUsage == 0 ? 0 : device.usage / totalUsage;
+                          return breakdownTile(
+                            device.icon,
+                            device.name,
+                            "${device.usage.toStringAsFixed(1)} kWh",
+                            percent,
+                          );
+                        }).toList(),
+                      ),
                     ],
                   ),
                 ),
@@ -169,7 +213,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             top: 70,
             right: 12,
             child: FadeTransition(
-              opacity: _profileController,
+              opacity: _profileFadeAnimation, // ✅ fixed
               child: SlideTransition(
                 position: _profileSlideAnimation,
                 child: ScaleTransition(
@@ -198,33 +242,44 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text('Profile',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white)),
                         const SizedBox(height: 12),
                         const CircleAvatar(
                           radius: 30,
                           backgroundColor: Colors.teal,
-                          child: Icon(Icons.person, size: 30, color: Colors.white),
+                          child: Icon(Icons.person,
+                              size: 30, color: Colors.white),
                         ),
                         const SizedBox(height: 12),
                         const Text('Marie Fe Tapales',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
                         const Text('marie@example.com',
-                            style: TextStyle(color: Colors.white70, fontSize: 12)),
+                            style: TextStyle(
+                                color: Colors.white70, fontSize: 12)),
                         const SizedBox(height: 12),
                         InkWell(
                           onTap: () {
                             _profileController.reverse();
-                            Future.delayed(const Duration(milliseconds: 300), () {
+                            Future.delayed(const Duration(milliseconds: 300),
+                                () {
                               if (!mounted) return;
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (_) => const EnergyProfileScreen()));
+                                      builder: (_) =>
+                                          const EnergyProfileScreen()));
                             });
                           },
                           child: const Text('View Profile',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
                         ),
                         const SizedBox(height: 8),
                         ElevatedButton(
@@ -245,6 +300,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
         ],
       ),
 
+      // ✅ Bottom Nav unchanged
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
@@ -273,12 +329,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             default:
               page = const HomeScreen();
           }
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => page));
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => page));
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
           BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
-          BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.show_chart), label: 'Analytics'),
           BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
@@ -293,40 +351,81 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))],
+        gradient: const LinearGradient(
+            colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10))
+        ],
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: TextStyle(fontSize: 16, color: Colors.grey[400], fontWeight: FontWeight.w400)),
-        const SizedBox(height: 8),
-        Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: Colors.white)),
-        const SizedBox(height: 6),
-        Text(change, style: const TextStyle(fontSize: 14, color: Color(0xFF10b981), fontWeight: FontWeight.w500)),
-      ]),
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[400],
+                    fontWeight: FontWeight.w400)),
+            const SizedBox(height: 8),
+            Text(value,
+                style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white)),
+            const SizedBox(height: 6),
+            Text(change,
+                style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF10b981),
+                    fontWeight: FontWeight.w500)),
+          ]),
     );
   }
 
-  Widget breakdownTile(IconData icon, String label, String value, double percent) {
+  Widget breakdownTile(
+      IconData icon, String label, String value, double percent) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 6))],
+        gradient: const LinearGradient(
+            colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 6))
+        ],
       ),
       child: Row(children: [
-        Container(width: 40, height: 40, decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: Colors.white, size: 22)),
+        Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+                color: Colors.teal, borderRadius: BorderRadius.circular(12)),
+            child: Icon(icon, color: Colors.white, size: 22)),
         const SizedBox(width: 16),
         Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-            const SizedBox(height: 6),
-            LinearProgressIndicator(value: percent, color: const Color(0xFF10b981), backgroundColor: Colors.white.withValues(alpha: 0.2)),
-          ]),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white)),
+                const SizedBox(height: 6),
+                LinearProgressIndicator(
+                    value: percent,
+                    color: const Color(0xFF10b981),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2)),
+              ]),
         ),
         const SizedBox(width: 16),
-        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+        Text(value,
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.w500)),
       ]),
     );
   }
@@ -343,7 +442,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
               showTitles: true,
               getTitlesWidget: (value, meta) {
                 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                return Padding(padding: const EdgeInsets.only(top: 4), child: Text(days[value.toInt() % 7], style: const TextStyle(fontSize: 10, color: Colors.white)));
+                return Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(days[value.toInt() % 7],
+                        style:
+                            const TextStyle(fontSize: 10, color: Colors.white)));
               },
             ),
           ),
@@ -352,11 +455,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
         borderData: FlBorderData(show: false),
         lineBarsData: [
           LineChartBarData(
-            spots: const [FlSpot(0, 20), FlSpot(1, 18), FlSpot(2, 30), FlSpot(3, 28), FlSpot(4, 40), FlSpot(5, 25), FlSpot(6, 30)],
+            spots: const [
+              FlSpot(0, 20),
+              FlSpot(1, 18),
+              FlSpot(2, 30),
+              FlSpot(3, 28),
+              FlSpot(4, 40),
+              FlSpot(5, 25),
+              FlSpot(6, 30)
+            ],
             isCurved: true,
             color: Colors.white,
             dotData: FlDotData(show: true),
-            belowBarData: BarAreaData(show: true, color: Colors.white.withValues(alpha: 0.25)),
+            belowBarData: BarAreaData(
+                show: true, color: Colors.white.withValues(alpha: 0.25)),
           ),
         ],
       ),
