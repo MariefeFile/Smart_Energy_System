@@ -33,13 +33,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // Sidebar animation
     _sidebarController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
+  duration: const Duration(milliseconds: 400),
+  vsync: this,
+);
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(-1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _sidebarController, curve: Curves.easeInOut));
+  begin: const Offset(1.0, 0.0), // off-screen right
+  end: Offset.zero,
+).animate(CurvedAnimation(parent: _sidebarController, curve: Curves.easeInOut));
 
     // Overlay fade animation
     _overlayController = AnimationController(
@@ -152,17 +152,84 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.notifications, color: Colors.teal),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode, color: Colors.teal),
-                        onPressed: () {
-                          setState(() {
-                            _isDarkMode = !_isDarkMode;
-                          });
-                        },
-                      ),
+  icon: const Icon(Icons.notifications, color: Colors.teal),
+  onPressed: () {},
+),
+
+IconButton(
+  icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode, color: Colors.teal),
+  onPressed: () {
+    setState(() {
+      _isDarkMode = !_isDarkMode;
+    });
+  },
+),
+
+// Bento menu icon with dynamic glow effect
+// Bento menu icon with 3D glow effect
+GestureDetector(
+  onTap: _toggleFeatures,
+  child: AnimatedContainer(
+    duration: const Duration(milliseconds: 300),
+    margin: const EdgeInsets.symmetric(horizontal: 8),
+    padding: const EdgeInsets.all(6),
+    decoration: BoxDecoration(
+      color: Colors.teal,
+      borderRadius: BorderRadius.circular(8),
+      boxShadow: _sidebarController.isCompleted
+          ? [
+              // Main glow
+              BoxShadow(
+                color: Colors.tealAccent.withValues(alpha: 0.7),
+                blurRadius: 10,
+                spreadRadius: 1,
+                offset: const Offset(0, 0),
+              ),
+              // Top-left shadow for depth
+              BoxShadow(
+                color: Colors.teal.withValues(alpha: 0.5),
+                blurRadius: 6,
+                offset: const Offset(-2, -2),
+              ),
+              // Bottom-right shadow for depth
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 6,
+                offset: const Offset(2, 2),
+              ),
+            ]
+          : [
+              // subtle 3D shadow when inactive
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 4,
+                offset: const Offset(2, 2),
+              ),
+            ],
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (i) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (j) {
+            return Container(
+              margin: const EdgeInsets.all(1.5),
+              width: 3,
+              height: 3,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            );
+          }),
+        );
+      }),
+    ),
+  ),
+),
+
+
                       // Profile avatar
                       GestureDetector(
                         onTap: _toggleProfile,
@@ -213,28 +280,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
           // Sidebar
-          SlideTransition(
-            position: _slideAnimation,
-            child: Container(
-              width: 250,
-              height: double.infinity,
-             
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 80),
-                      
-                      
-                      Expanded(child: ListView(children: _buildFeaturesList())),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+         SlideTransition(
+  position: _slideAnimation, // use the field instead of a new Tween
+  child: Align(
+    alignment: Alignment.centerRight,
+    child: Container(
+      width: 250,
+      height: double.infinity,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 80),
+              Expanded(child: ListView(children: _buildFeaturesList())),
+            ],
           ),
+        ),
+      ),
+    ),
+  ),
+),
+
+
+
           // Profile Panel (pop out from person icon)
           Align(
             alignment: Alignment.topRight,
@@ -313,29 +383,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-          // Floating "Open Features" Button (bottom-left)
-          Positioned(
-            top: 40,
-            left: 20,
-            child: GestureDetector(
-              onTap: _toggleFeatures,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(100),
-                      blurRadius: 6,
-                      offset: const Offset(2, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(Icons.add, color: Colors.white, size: 28),
-              ),
-            ),
-          ),
+         
+
         ],
       ),
       bottomNavigationBar: _buildBottomNavBar(),
