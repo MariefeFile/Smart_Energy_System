@@ -80,7 +80,7 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
   void _navigateToAddDevice() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ExploreTab()),
+      MaterialPageRoute(builder: (context) => const DevicesTab()),
     );
   }
 
@@ -126,7 +126,7 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
               context, MaterialPageRoute(builder: (_) => const HomeScreen()));
         } else if (index == 1) {
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => const ExploreTab()));
+              context, MaterialPageRoute(builder: (_) => const DevicesTab()));
         } else if (index == 2) {
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (_) => const AnalyticsScreen()));
@@ -144,7 +144,7 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
       },
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
-        BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
+        BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Devices'),
         BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
         BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),

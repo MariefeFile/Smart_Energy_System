@@ -218,13 +218,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: Container(
               width: 250,
               height: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
-                ),
-              ),
+             
               child: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -232,11 +226,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 80),
-                      const Text(
-                        'Energy Features',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.white),
-                      ),
-                      const SizedBox(height: 20),
+                      
+                      
                       Expanded(child: ListView(children: _buildFeaturesList())),
                     ],
                   ),
@@ -367,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             page = const HomeScreen();
             break;
           case 1:
-            page = const ExploreTab();
+            page = const DevicesTab();
             break;
           case 2:
             page = const AnalyticsScreen();
@@ -388,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       },
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
-        BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
+        BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Devices'),
         BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
         BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
@@ -653,135 +644,147 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  List<Widget> _buildFeaturesList() {
-  // Normal features with screens
+List<Widget> _buildFeaturesList() {
   final features = [
-    {"icon": Icons.explore, "title": "Explore", "screen": const ExploreTab()},
+    {"icon": Icons.devices, "title": "Devices", "screen": const DevicesTab()},
     {"icon": Icons.analytics, "title": "Analytics", "screen": const AnalyticsScreen()},
     {"icon": Icons.schedule, "title": "Scheduling", "screen": const EnergySchedulingScreen()},
     {"icon": Icons.settings, "title": "Settings", "screen": const EnergySettingScreen()},
-   
+    {"icon": Icons.menu_book, "title": "Guidelines"}, // no screen, toggle dropdown
   ];
 
-  // Store widgets here
-  final List<Widget> featureWidgets = [];
-
-  // Add normal features
-  for (var feature in features) {
-    featureWidgets.add(
-      Container(
-        margin: const EdgeInsets.only(bottom: 12),
+  return [
+    // Floating panel container
+    Padding(
+      padding: const EdgeInsets.all(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withAlpha(50),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(15),
-           onTap: () {
-  if (feature["title"] == "Guidelines") {
-    setState(() {
-      _showGuidelines = !_showGuidelines; // ✅ toggle panel
-    });
-  } else {
-    selectFeature(feature["title"] as String, feature["screen"] as Widget);
-  }
-},
-
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Row(
-                children: [
-                  Icon(feature["icon"] as IconData, color: Colors.tealAccent),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Text(
-                      feature["title"] as String,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          gradient: LinearGradient(
+    colors: [
+      Color.fromARGB(255, 31, 94, 196).withValues(alpha: 0.6),
+      Color.fromARGB(255, 41, 40, 75).withValues(alpha: 0.6),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black45,
+              blurRadius: 8,
+              offset: Offset(0, 4),
             ),
-          ),
+          ],
         ),
-      ),
-    );
-  }
-
-  // ✅ Guidelines dropdown button
-  featureWidgets.add(
-    Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withAlpha(50),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(15),
-          onTap: () {
-            setState(() {
-              _showGuidelines = !_showGuidelines;
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(15),
-            child: Row(
-              children: [
-                const Icon(Icons.menu_book, color: Colors.tealAccent),
-                const SizedBox(width: 15),
-                const Expanded(
-                  child: Text(
-                    "Guidelines",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title inside the panel
+            Row(
+              children: const [
+               
+                Text(
+                  "Explore More",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                ),
-                Icon(
-                  _showGuidelines ? Icons.expand_less : Icons.expand_more,
-                  color: Colors.white70,
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    ),
-  );
-    // ✅ Show dropdown content if expanded
-  if (_showGuidelines) {
-    featureWidgets.add(
-      Padding(
-        padding: const EdgeInsets.only(left: 40, top: 4, bottom: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text("⚡ Save energy by turning off unused appliances.",
-                style: TextStyle(color: Colors.white70, fontSize: 14)),
-            SizedBox(height: 4),
-            Text("🌞 Use natural light during daytime.",
-                style: TextStyle(color: Colors.white70, fontSize: 14)),
-            SizedBox(height: 4),
-            Text("❄️ Optimize air conditioning usage.",
-                style: TextStyle(color: Colors.white70, fontSize: 14)),
-            SizedBox(height: 4),
-            Text("🔌 Unplug chargers when not in use.",
-                style: TextStyle(color: Colors.white70, fontSize: 14)),
+            const SizedBox(height: 12),
+            // Grid of icons
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: features.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 1.0,
+              ),
+              itemBuilder: (context, index) {
+                final feature = features[index];
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        if (feature["title"] == "Guidelines") {
+                          setState(() {
+                            _showGuidelines = !_showGuidelines;
+                          });
+                        } else {
+                          selectFeature(
+                              feature["title"] as String,
+                              feature["screen"] as Widget);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(50),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          feature["icon"] as IconData,
+                          color: Colors.tealAccent,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      feature["title"] as String,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13),
+                    ),
+                  ],
+                );
+              },
+            ),
+            // Guidelines dropdown
+            if (_showGuidelines)
+              Padding(
+                padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      "⚡ Save energy by turning off unused appliances.",
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      "🌞 Use natural light during daytime.",
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      "❄️ Optimize air conditioning usage.",
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      "🔌 Unplug chargers when not in use.",
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
-    );
-  }
-
-  return featureWidgets; // ✅ important
+    ),
+  ];
 }
+
+
+
 }

@@ -48,7 +48,7 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
         break;
       case 1:
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const ExploreTab()));
+            context, MaterialPageRoute(builder: (_) => const DevicesTab()));
         break;
       case 2:
         Navigator.pushReplacement(
@@ -115,8 +115,8 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
         onTap: _onTabTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
-          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Analytics'),
+          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Devices'),
+          BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
           BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),

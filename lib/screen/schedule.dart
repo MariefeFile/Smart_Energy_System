@@ -104,7 +104,7 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen>
         page = const HomeScreen();
         break;
       case 1:
-        page = const ExploreTab();
+        page = const DevicesTab();
         break;
       case 2:
         page = const AnalyticsScreen();
@@ -517,7 +517,7 @@ class _EnergySchedulingScreenState extends State<EnergySchedulingScreen>
         onTap: _onTabTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: "Energy"),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
+          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Devices"),
           BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: "Analytics"),
           BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Schedule"),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),

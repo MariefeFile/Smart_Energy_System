@@ -7,14 +7,14 @@ import 'package:smartenergy_app/screen/admin_home.dart';
 import 'chatbot.dart';
 import 'connected_devices.dart';
 
-class ExploreTab extends StatefulWidget {
-  const ExploreTab({super.key});
+class DevicesTab extends StatefulWidget {
+  const DevicesTab({super.key});
 
   @override
-  State<ExploreTab> createState() => _ExploreTabState();
+  State<DevicesTab> createState() => _ExploreTabState();
 }
 
-class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
+class _ExploreTabState extends State<DevicesTab> with TickerProviderStateMixin {
   bool _isDarkMode = false;
 
   late AnimationController _controller;
@@ -90,66 +90,118 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
   }
 
   // Add or Edit device dialog
-  void _showDeviceDialog({ConnectedDevice? device, int? index}) {
-    final nameController = TextEditingController(text: device?.name ?? "");
-    final statusController = TextEditingController(text: device?.status ?? "");
+void _showDeviceDialog({ConnectedDevice? device, int? index}) {
+  final nameController = TextEditingController(text: device?.name ?? "");
+  final statusController = TextEditingController(text: device?.status ?? "");
+  IconData? selectedIcon = device?.icon;
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(device == null ? "Add Device" : "Edit Device"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: "Device Name"),
-            ),
-            TextField(
-              controller: statusController,
-              decoration: const InputDecoration(labelText: "Status"),
-            ),
-          ],
+  final Map<String, IconData> icons = {
+    '💡 ': Icons.lightbulb,
+    '🔌 ': Icons.power,
+    '📱 ': Icons.phone_android,
+    '💻 ': Icons.laptop,
+    '🎛 ': Icons.devices,
+  };
+
+  showDialog(
+    context: context,
+    builder: (context) => Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: 400, // <-- Set a max width here
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                device == null ? 'Add Device' : 'Edit Device',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Device Name',
+                  border: UnderlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: statusController,
+                decoration: const InputDecoration(
+                  labelText: 'Status',
+                  border: UnderlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                value: selectedIcon != null
+                    ? icons.entries.firstWhere((e) => e.value == selectedIcon!).key
+                    : null,
+                hint: const Text('Select Icon'),
+                items: icons.keys.map((iconName) {
+                  return DropdownMenuItem(
+                    value: iconName,
+                    child: Text(iconName),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  selectedIcon = icons[value!];
+                },
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (nameController.text.isNotEmpty) {
+                        setState(() {
+                          if (device == null) {
+                            connectedDevices.add(
+                              ConnectedDevice(
+                                name: nameController.text,
+                                status: statusController.text,
+                                icon: selectedIcon ?? Icons.devices,
+                                usage: 0.0,
+                                percent: 0.0,
+                              ),
+                            );
+                          } else {
+                            connectedDevices[index!] = ConnectedDevice(
+                              name: nameController.text,
+                              status: statusController.text,
+                              icon: selectedIcon ?? device.icon,
+                              usage: device.usage,
+                              percent: device.percent,
+                            );
+                          }
+                          filteredDevices = List.from(connectedDevices);
+                        });
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: Text(device == null ? 'Add' : 'Save'),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty) {
-                setState(() {
-                  if (device == null) {
-                    connectedDevices.add(
-                      ConnectedDevice(
-                        name: nameController.text,
-                        status: statusController.text,
-                        icon: Icons.devices,
-                        usage: 0.0,
-                        percent: 0.0,
-                      ),
-                    );
-                  } else {
-                    connectedDevices[index!] = ConnectedDevice(
-                      name: nameController.text,
-                      status: statusController.text,
-                      icon: device.icon,
-                      usage: device.usage,
-                      percent: device.percent,
-                    );
-                  }
-                  filteredDevices = List.from(connectedDevices);
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: Text(device == null ? "Add" : "Save"),
-          ),
-        ],
+        ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 
   // Remove device
   void _removeDevice(int index) {
@@ -508,7 +560,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
+          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Devices'),
           BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
           BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
