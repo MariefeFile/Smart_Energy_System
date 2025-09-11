@@ -435,61 +435,73 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
   }
 
   Widget lineChart() {
-    return LineChart(
-      LineChartData(
-        lineTouchData: LineTouchData(
-          touchCallback: (FlTouchEvent event, LineTouchResponse? response) {
-            if (!event.isInterestedForInteractions ||
-                response == null ||
-                response.lineBarSpots == null) return;
+  // Put days at the top so both chart + other widgets use the same mapping
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-            final spot = response.lineBarSpots!.first;
-            final dayIndex = spot.x.toInt();
+  return LineChart(
+    LineChartData(
+      lineTouchData: LineTouchData(
+        handleBuiltInTouches: true,
+        touchCallback: (FlTouchEvent event, LineTouchResponse? response) {
+          if (!event.isInterestedForInteractions ||
+              response == null ||
+              response.lineBarSpots == null) return;
 
-            setState(() {
-              _selectedDayIndex = dayIndex;
-            });
-          },
-        ),
-        titlesData: FlTitlesData(
-          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                return Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(days[value.toInt() % 7],
-                        style:
-                            const TextStyle(fontSize: 10, color: Colors.white)));
-              },
-            ),
-          ),
-        ),
-        gridData: FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        lineBarsData: [
-          LineChartBarData(
-            spots: const [
-              FlSpot(0, 20),
-              FlSpot(1, 18),
-              FlSpot(2, 30),
-              FlSpot(3, 28),
-              FlSpot(4, 40),
-              FlSpot(5, 25),
-              FlSpot(6, 30)
-            ],
-            isCurved: true,
-            color: Colors.white,
-            dotData: FlDotData(show: true),
-            belowBarData: BarAreaData(
-                show: true, color: Colors.white.withValues(alpha: 0.25)),
-          ),
-        ],
+          final spot = response.lineBarSpots!.first;
+          setState(() {
+            _selectedDayIndex = spot.x.toInt();
+          });
+        },
       ),
-    );
-  }
+      titlesData: FlTitlesData(
+        leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: 28,
+            getTitlesWidget: (value, meta) {
+              final index = value.toInt();
+              if (index < 0 || index >= days.length) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  days[index],
+                  style: const TextStyle(fontSize: 10, color: Colors.white),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+      gridData: FlGridData(show: false),
+      borderData: FlBorderData(show: false),
+      lineBarsData: [
+        LineChartBarData(
+          spots: const [
+            FlSpot(0, 20), // Mon
+            FlSpot(1, 18), // Tue
+            FlSpot(2.5, 20), // Wed
+            FlSpot(3, 28), // Thu
+            FlSpot(4, 40), // Fri
+            FlSpot(5, 25), // Sat
+            FlSpot(6, 30), // Sun
+          ],
+          isCurved: true,
+          color: Colors.white,
+          barWidth: 3,
+          dotData: FlDotData(show: true),
+          belowBarData: BarAreaData(
+            show: true,
+            color: Colors.white.withValues(alpha: 0.25),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 }
