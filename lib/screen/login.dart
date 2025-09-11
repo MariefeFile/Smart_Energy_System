@@ -4,6 +4,7 @@ import 'admin_home.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'theadmin.dart'; 
+import 'package:smartenergy_app/screen/user_signup.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -142,29 +143,39 @@ SizedBox(
   ),
 ),
                     const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          isLogin
-                              ? "Don't have an account?"
-                              : "Already have an account?",
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              isLogin = !isLogin;
-                            });
-                          },
-                          child: Text(
-                            isLogin ? 'Sign Up' : 'Login',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
+                  Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    Text(
+      isLogin
+          ? "Don't have an account?"
+          : "Already have an account?",
+      style: const TextStyle(color: Colors.white70),
+    ),
+    TextButton(
+      onPressed: () {
+        if (isLogin) {
+          // Go to Sign Up page
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const  SignUpPage(), // <-- your sign-up page
+            ),
+          );
+        } else {
+          setState(() {
+            isLogin = true; // go back to login screen
+          });
+        }
+      },
+      child: Text(
+        isLogin ? 'Sign Up' : 'Login',
+        style: const TextStyle(color: Colors.white),
+      ),
+    ),
+  ],
+),
+const SizedBox(height: 20),
 
 
                     

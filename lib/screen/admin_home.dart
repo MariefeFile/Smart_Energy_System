@@ -165,8 +165,7 @@ IconButton(
   },
 ),
 
-// Bento menu icon with dynamic glow effect
-// Bento menu icon with 3D glow effect
+
 GestureDetector(
   onTap: _toggleFeatures,
   child: AnimatedContainer(
@@ -696,7 +695,7 @@ GestureDetector(
 List<Widget> _buildFeaturesList() {
   final features = [
     {"icon": Icons.devices, "title": "Devices", "screen": const DevicesTab()},
-    {"icon": Icons.analytics, "title": "Analytics", "screen": const AnalyticsScreen()},
+    {"icon": Icons.show_chart, "title": "Analytics", "screen": const AnalyticsScreen()},
     {"icon": Icons.schedule, "title": "Scheduling", "screen": const EnergySchedulingScreen()},
     {"icon": Icons.settings, "title": "Settings", "screen": const EnergySettingScreen()},
     {"icon": Icons.menu_book, "title": "Guidelines"}, // no screen, toggle dropdown
