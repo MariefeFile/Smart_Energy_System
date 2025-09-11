@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+ import 'login.dart'; 
 
 class UserModel {
   String name;
@@ -224,10 +225,10 @@ class _MyAdminScreenState extends State<MyAdminScreen> {
                 Container(
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: Colors.white.withOpacity(0.8),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
+                          color: Colors.black.withOpacity(0.1),
                           blurRadius: 10,
                           offset: const Offset(0, 2))
                     ],
@@ -256,13 +257,39 @@ class _MyAdminScreenState extends State<MyAdminScreen> {
                           icon: const Icon(Icons.notifications,
                               color: Colors.teal),
                           onPressed: () {}),
-                      IconButton(
+
+                      // ✅ Profile dropdown with logout
+                      PopupMenuButton<String>(
                         icon: const Icon(Icons.account_circle,
                             color: Colors.teal, size: 28),
-                        onPressed: () => ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                                content: Text("Profile feature coming soon!"))),
+                        onSelected: (value) {
+                          if (value == 'view_profile') {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("View Profile clicked")),
+                            );
+                            // TODO: Navigate to Profile screen
+                          } else if (value == 'logout') {
+                            // Navigate back to login screen and remove all previous routes
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (context) => AuthPage()), // Replace with your login screen
+                              (route) => false,
+                            );
+                          }
+                        },
+                        itemBuilder: (BuildContext context) => [
+                          const PopupMenuItem(
+                            value: 'view_profile',
+                            child: Text('View Profile'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'logout',
+                            child: Text('Logout'),
+                          ),
+                        ],
                       ),
+
                       const SizedBox(width: 12),
                     ],
                   ),
@@ -277,11 +304,11 @@ class _MyAdminScreenState extends State<MyAdminScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(16.0), // inner padding
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: Colors.white.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
+                            color: Colors.black.withOpacity(0.2),
                             blurRadius: 6,
                             offset: const Offset(0, 3),
                           ),
@@ -302,7 +329,7 @@ class _MyAdminScreenState extends State<MyAdminScreen> {
                                     prefixIcon: const Icon(Icons.search,
                                         color: Colors.white70),
                                     filled: true,
-                                    fillColor: Colors.white.withValues(alpha: 0.05),
+                                    fillColor: Colors.white.withOpacity(0.05),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide.none,

@@ -144,7 +144,7 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
       },
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
-        BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Devices'),
+        BottomNavigationBarItem(icon: Icon(Icons.devices), label: 'Devices'),
         BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
         BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),

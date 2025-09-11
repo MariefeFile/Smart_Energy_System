@@ -136,7 +136,7 @@ SizedBox(
     ),
     icon: const Icon(Icons.admin_panel_settings, color: Colors.white),
     label: const Text(
-      'Admin Login',
+      'Admin',
       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
     ),
   ),
