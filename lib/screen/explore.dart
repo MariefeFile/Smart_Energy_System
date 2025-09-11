@@ -89,7 +89,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
     }
   }
 
-  // ✅ Add or Edit device dialog
+  // Add or Edit device dialog
   void _showDeviceDialog({ConnectedDevice? device, int? index}) {
     final nameController = TextEditingController(text: device?.name ?? "");
     final statusController = TextEditingController(text: device?.status ?? "");
@@ -117,42 +117,41 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
             child: const Text("Cancel"),
           ),
           ElevatedButton(
-  onPressed: () {
-    if (nameController.text.isNotEmpty) {
-      setState(() {
-        if (device == null) {
-          connectedDevices.add(
-            ConnectedDevice(
-              name: nameController.text,
-              status: statusController.text,
-              icon: Icons.devices,
-              usage: 0.0,       // default value for new device
-              percent: 0.0,     // default value for new device
-            ),
-          );
-        } else {
-          connectedDevices[index!] = ConnectedDevice(
-            name: nameController.text,
-            status: statusController.text,
-            icon: device.icon,
-            usage: device.usage,       // keep previous usage
-            percent: device.percent,   // keep previous percent
-          );
-        }
-        filteredDevices = List.from(connectedDevices);
-      });
-      Navigator.pop(context);
-    }
-  },
-  child: Text(device == null ? "Add" : "Save"),
-),
-
+            onPressed: () {
+              if (nameController.text.isNotEmpty) {
+                setState(() {
+                  if (device == null) {
+                    connectedDevices.add(
+                      ConnectedDevice(
+                        name: nameController.text,
+                        status: statusController.text,
+                        icon: Icons.devices,
+                        usage: 0.0,
+                        percent: 0.0,
+                      ),
+                    );
+                  } else {
+                    connectedDevices[index!] = ConnectedDevice(
+                      name: nameController.text,
+                      status: statusController.text,
+                      icon: device.icon,
+                      usage: device.usage,
+                      percent: device.percent,
+                    );
+                  }
+                  filteredDevices = List.from(connectedDevices);
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: Text(device == null ? "Add" : "Save"),
+          ),
         ],
       ),
     );
   }
 
-  // ✅ Remove device
+  // Remove device
   void _removeDevice(int index) {
     setState(() {
       connectedDevices.removeAt(index);
@@ -163,13 +162,6 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ✅ Add button
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.teal,
-        onPressed: () => _showDeviceDialog(),
-        child: const Icon(Icons.add),
-      ),
-
       body: Stack(
         children: [
           Container(
@@ -181,7 +173,6 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
               ),
             ),
           ),
-
           SafeArea(
             child: Column(
               children: [
@@ -239,9 +230,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
                 // Main Body
                 Expanded(
                   child: FadeTransition(
@@ -258,7 +247,6 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                           ),
                         ),
                         const SizedBox(height: 16),
-
                         // Search + Chat
                         Row(
                           children: [
@@ -300,20 +288,43 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 16),
+                        // Connected Devices Header + Add Button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Connected Devices',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            FloatingActionButton.extended(
+  backgroundColor: Colors.transparent,
+  elevation: 0,
+  onPressed: () => _showDeviceDialog(),
+  label: const Text(
+    "Add Device",
+    style: TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+      fontSize: 12, // smaller font size
+    ),
+  ),
+  icon: const Icon(
+    Icons.add,
+    color: Colors.white,
+    size: 16, // smaller icon
+  ),
+  extendedPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // smaller padding
+),
 
-                        const Text(
-                          'Connected Devices',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                          ],
                         ),
                         const SizedBox(height: 12),
-
-                        // ✅ Updated device cards
+                        // Device cards
                         ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
@@ -356,7 +367,8 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.edit, color: Colors.yellow),
-                                      onPressed: () => _showDeviceDialog(device: device, index: index),
+                                      onPressed: () =>
+                                          _showDeviceDialog(device: device, index: index),
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.delete, color: Colors.red),
@@ -375,8 +387,7 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
               ],
             ),
           ),
-
-          // Profile Popover (unchanged)
+          // Profile Popover
           Positioned(
             top: 70,
             right: 12,
@@ -461,8 +472,6 @@ class _ExploreTabState extends State<ExploreTab> with TickerProviderStateMixin {
           ),
         ],
       ),
-
-      // Bottom Navigation (unchanged)
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
