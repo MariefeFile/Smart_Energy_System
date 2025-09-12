@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class ConnectedDevice {
-  final String name;
-  final IconData icon;
-  final String status;
-  double usage; // ✅ usage (kWh) for analytics
-  double percent; // ✅ percent for breakdown bar
+  String name;
+  String status; // ✅ make it mutable
+  IconData icon;
+  double usage;
+  double percent;
 
   ConnectedDevice({
     required this.name,
-    required this.icon,
     required this.status,
+    required this.icon,
     required this.usage,
     required this.percent,
   });
@@ -21,7 +21,7 @@ List<ConnectedDevice> connectedDevices = [
   ConnectedDevice(
       name: "Rice Cooker",
       icon: Icons.kitchen,
-      status: "On",
+      status: "Off",
       usage: 78.1,
       percent: 0.46),
   ConnectedDevice(
@@ -33,13 +33,13 @@ List<ConnectedDevice> connectedDevices = [
   ConnectedDevice(
       name: "TV",
       icon: Icons.tv,
-      status: "On",
+      status: "Off",
       usage: 15.2,
       percent: 0.12),
   ConnectedDevice(
       name: "Security Camera",
       icon: Icons.videocam,
-      status: "Active",
+      status: "Off",
       usage: 8.3,
       percent: 0.06),
   ConnectedDevice(
@@ -51,25 +51,25 @@ List<ConnectedDevice> connectedDevices = [
   ConnectedDevice(
       name: "Thermostat",
       icon: Icons.thermostat,
-      status: "22°C",
+      status: "Off",
       usage: 5.4,
       percent: 0.04),
   ConnectedDevice(
       name: "Cellphone",
       icon: Icons.phone_android,
-      status: "Charging",
+      status: "Off",
       usage: 2.1,
       percent: 0.02),
   ConnectedDevice(
       name: "Electric Fan",
       icon: Icons.toys,
-      status: "On",
+      status: "Off",
       usage: 10.0,
       percent: 0.07),
   ConnectedDevice(
       name: "Laptop",
       icon: Icons.laptop,
-      status: "Idle",
+      status: "Off",
       usage: 18.6,
       percent: 0.14),
 ];
