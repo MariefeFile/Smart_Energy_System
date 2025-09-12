@@ -19,21 +19,43 @@ class AnalyticsScreen extends StatefulWidget {
 class _AnalyticsScreenState extends State<AnalyticsScreen>
     with TickerProviderStateMixin {
   bool _isDarkMode = false;
-  int? _selectedDayIndex;
   EnergyRange _selectedRange = EnergyRange.daily;
+  DateTime? _selectedDateFromChart;
 
   late AnimationController _profileController;
   late Animation<Offset> _profileSlideAnimation;
   late Animation<double> _profileScaleAnimation;
   late Animation<double> _profileFadeAnimation;
 
-  // Selected month for dropdown
   int _selectedMonth = DateTime.now().month;
-
-  // --- New date selection
   DateTime _selectedDate = DateTime.now();
   DateTime _selectedWeekStart =
       DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
+
+  static const List<String> _monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
+
+  static const List<String> _weekDays = [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun'
+  ];
 
   @override
   void initState() {
@@ -69,23 +91,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     }
   }
 
-  // --- Month names (for daily/weekly/monthly)
-  static const List<String> _monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
-
-  /// Header widget with date/week/month picker
   Widget _headerWidget() {
     switch (_selectedRange) {
       case EnergyRange.daily:
@@ -174,27 +179,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     }
   }
 
-  /// Data for chart
   List<FlSpot> _getUsageData() {
     switch (_selectedRange) {
       case EnergyRange.daily:
-        return List.generate(
-          24,
-          (h) => FlSpot(h.toDouble(), 10 + (h % 6) * 3),
-        );
-
+        return List.generate(24, (h) => FlSpot(h.toDouble(), 10 + (h % 6) * 3));
       case EnergyRange.weekly:
-        return List.generate(
-          7,
-          (d) => FlSpot(d.toDouble(), 20 + (d % 3) * 5),
-        );
-
+        return List.generate(7, (d) => FlSpot(d.toDouble(), 20 + (d % 3) * 5));
       case EnergyRange.monthly:
         final daysInMonth = DateTime(DateTime.now().year, _selectedMonth + 1, 0).day;
-        return List.generate(
-          daysInMonth,
-          (i) => FlSpot((i + 1).toDouble(), 30 + (i % 5) * 4),
-        );
+        return List.generate(daysInMonth, (i) => FlSpot((i + 1).toDouble(), 30 + (i % 5) * 4));
     }
   }
 
@@ -232,7 +225,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     );
   }
 
-  // --- Keep the rest of your original code (build, summaryCard, breakdownTile, lineChart, etc.) untouched
   @override
   Widget build(BuildContext context) {
     double totalUsage = connectedDevices.fold(0, (sum, d) => sum + d.usage);
@@ -255,10 +247,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                 child: Container(
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: Colors.white.withOpacity(0.8),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: Colors.black.withOpacity(0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -280,17 +272,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                         ),
                       ),
                       IconButton(
-                        icon:
-                            const Icon(Icons.notifications, color: Colors.teal),
+                        icon: const Icon(Icons.notifications, color: Colors.teal),
                         onPressed: () {},
                       ),
                       IconButton(
-                        icon: Icon(
-                          _isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                          color: Colors.teal,
-                        ),
-                        onPressed: () =>
-                            setState(() => _isDarkMode = !_isDarkMode),
+                        icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode, color: Colors.teal),
+                        onPressed: () => setState(() => _isDarkMode = !_isDarkMode),
                       ),
                       GestureDetector(
                         onTap: _toggleProfile,
@@ -361,9 +348,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                         ],
                       ),
                       const SizedBox(height: 24),
-                      if (_selectedDayIndex != null) ...[
+                      // Connected devices breakdown dynamically updated
+                      if (_selectedDateFromChart != null) ...[
                         Text(
-                          'Devices on ${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][_selectedDayIndex! % 7]}',
+                          'Devices on ${_monthNames[_selectedDateFromChart!.month - 1]} '
+                          '${_selectedDateFromChart!.day}, ${_selectedDateFromChart!.year}',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -372,11 +361,19 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                         const SizedBox(height: 12),
                         Column(
                           children: connectedDevices.map((device) {
-                            double adjustedUsage =
-                                device.usage * (0.6 + (_selectedDayIndex! * 0.1));
-                            double percent = totalUsage == 0
-                                ? 0
-                                : adjustedUsage / totalUsage;
+                            double adjustedUsage = device.usage;
+                            if (_selectedRange == EnergyRange.weekly) {
+                              int dayIndex = _selectedDateFromChart!.difference(_selectedWeekStart).inDays;
+                              adjustedUsage *= (0.6 + (dayIndex * 0.1));
+                            } else if (_selectedRange == EnergyRange.monthly) {
+                              int dayIndex = _selectedDateFromChart!.day - 1;
+                              adjustedUsage *= (0.5 + (dayIndex * 0.05));
+                            } else if (_selectedRange == EnergyRange.daily) {
+                              int hour = _selectedDateFromChart!.hour;
+                              adjustedUsage *= (0.5 + (hour * 0.05));
+                            }
+                            double totalForSelected = connectedDevices.fold(0, (sum, d) => sum + d.usage);
+                            double percent = totalForSelected == 0 ? 0 : adjustedUsage / totalForSelected;
 
                             return breakdownTile(
                               device.icon,
@@ -393,6 +390,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               ),
             ],
           ),
+          // Profile popup unchanged
           Positioned(
             top: 70,
             right: 12,
@@ -437,8 +435,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                         const CircleAvatar(
                           radius: 30,
                           backgroundColor: Colors.teal,
-                          child:
-                              Icon(Icons.person, size: 30, color: Colors.white),
+                          child: Icon(Icons.person, size: 30, color: Colors.white),
                         ),
                         const SizedBox(height: 12),
                         const Text(
@@ -457,8 +454,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                         InkWell(
                           onTap: () async {
                             _profileController.reverse();
-                            await Future.delayed(
-                                const Duration(milliseconds: 300));
+                            await Future.delayed(const Duration(milliseconds: 300));
                             if (!mounted) return;
                             Navigator.push(
                               context,
@@ -497,7 +493,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
         unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-        backgroundColor: Colors.black.withValues(alpha: 0.4),
+        backgroundColor: Colors.black.withOpacity(0.4),
         currentIndex: 2,
         onTap: (index) {
           if (index == 2) return;
@@ -543,11 +539,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient:
-            const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -556,32 +551,19 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[400],
-              fontWeight: FontWeight.w400,
-            ),
-          ),
+          Text(title,
+              style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[400],
+                  fontWeight: FontWeight.w400)),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
+          Text(value,
+              style: const TextStyle(
+                  fontSize: 28, fontWeight: FontWeight.w600, color: Colors.white)),
           const SizedBox(height: 6),
-          Text(
-            change,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF10b981),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(change,
+              style: const TextStyle(
+                  fontSize: 14, color: Color(0xFF10b981), fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -593,11 +575,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient:
-            const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),
@@ -619,107 +600,146 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.white),
-                ),
+                Text(label,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white)),
                 const SizedBox(height: 6),
                 LinearProgressIndicator(
                   value: percent,
                   color: const Color(0xFF10b981),
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                  backgroundColor: Colors.grey[800],
+                  minHeight: 6,
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 16),
-          Text(
-            value,
-            style:
-                const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-          ),
+          const SizedBox(width: 12),
+          Text(value,
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         ],
       ),
     );
   }
 
   Widget lineChart() {
-    final data = _getUsageData();
+    final spots = _getUsageData();
+
+    double minX = 0;
+    double maxX = spots.length.toDouble() - 1;
+
+    if (_selectedRange == EnergyRange.monthly) {
+      minX = 1;
+      maxX = spots.length.toDouble();
+    } else if (_selectedRange == EnergyRange.daily) {
+      minX = 0;
+      maxX = 23;
+    } else if (_selectedRange == EnergyRange.weekly) {
+      minX = 0;
+      maxX = 6;
+    }
+
     return LineChart(
       LineChartData(
-        lineTouchData: LineTouchData(
-          handleBuiltInTouches: true,
-          touchCallback: (FlTouchEvent event, LineTouchResponse? response) {
-            if (!event.isInterestedForInteractions ||
-                response == null ||
-                response.lineBarSpots == null) return;
-            setState(() {
-              _selectedDayIndex = response.lineBarSpots!.first.x.toInt();
-            });
-          },
-        ),
+        minX: minX,
+        maxX: maxX,
+        minY: 0,
+        maxY: 50,
         titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: true, reservedSize: 32),
-          ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               interval: 1,
-              getTitlesWidget: (value, meta) {
-                if (_selectedRange == EnergyRange.daily) {
-                  return value % 1 == 0 && value >= 0 && value <= 23
-                      ? Text('${value.toInt()}h',
-                          style: const TextStyle(
-                              fontSize: 10, color: Colors.white))
-                      : const SizedBox.shrink();
-                }
+              getTitlesWidget: (value, _) {
                 if (_selectedRange == EnergyRange.weekly) {
-                  const days = [
-                    'Mon',
-                    'Tue',
-                    'Wed',
-                    'Thu',
-                    'Fri',
-                    'Sat',
-                    'Sun'
-                  ];
-                  final i = value.toInt();
-                  return i >= 0 && i < days.length
-                      ? Text(days[i],
-                          style: const TextStyle(
-                              fontSize: 10, color: Colors.white))
-                      : const SizedBox.shrink();
+                  int idx = value.toInt();
+                  if (idx >= 0 && idx < 7) {
+                    return Text(
+                      _weekDays[idx],
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    );
+                  }
+                } else if (_selectedRange == EnergyRange.monthly) {
+                  int day = value.toInt();
+                  if (day >= 1 && day <= spots.length) {
+                    return Text(
+                      day.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    );
+                  }
+                } else {
+                  int hour = value.toInt();
+                  if (hour >= 0 && hour <= 23) {
+                    return Text(
+                      hour.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    );
+                  }
                 }
-                // Monthly labels
-                // Monthly labels
-final int day = value.toInt();
-final lastDay =
-    DateTime(DateTime.now().year, _selectedMonth + 1, 0).day;
-if (day >= 1 && day <= lastDay) {
-  return Text('$day',
-      style: const TextStyle(fontSize: 10, color: Colors.white));
-}
-return const SizedBox.shrink();
-
+                return const SizedBox();
               },
             ),
           ),
         ),
-        gridData: FlGridData(show: false),
-        borderData: FlBorderData(show: false),
         lineBarsData: [
           LineChartBarData(
-            spots: data,
+            spots: spots,
             isCurved: true,
-            color: Colors.white,
+            color: Colors.teal,
             barWidth: 3,
-            dotData: FlDotData(show: false),
-            belowBarData:
-                BarAreaData(show: true, color: Colors.white.withValues(alpha: 0.25)),
+            belowBarData: BarAreaData(
+              show: true,
+              color: Colors.teal.withOpacity(0.2),
+            ),
+            dotData: FlDotData(show: true),
           ),
         ],
+        lineTouchData: LineTouchData(
+          handleBuiltInTouches: true,
+          touchTooltipData: LineTouchTooltipData(
+            tooltipBgColor: Colors.teal,
+            getTooltipItems: (touchedSpots) {
+              return touchedSpots.map((touchedSpot) {
+                String label = '';
+                switch (_selectedRange) {
+                  case EnergyRange.daily:
+                    label = '${touchedSpot.x.toInt()}:00';
+                    break;
+                  case EnergyRange.weekly:
+                    DateTime date =
+                        _selectedWeekStart.add(Duration(days: touchedSpot.x.toInt()));
+                    label =
+                        '${_weekDays[date.weekday - 1]}, ${_monthNames[date.month - 1]} ${date.day}';
+                    break;
+                  case EnergyRange.monthly:
+                    DateTime date =
+                        DateTime(DateTime.now().year, _selectedMonth, touchedSpot.x.toInt());
+                    label = '${_monthNames[date.month - 1]} ${date.day}';
+                    break;
+                }
+                return LineTooltipItem(label, const TextStyle(color: Colors.white));
+              }).toList();
+            },
+          ),
+          touchCallback: (event, response) {
+            if (!event.isInterestedForInteractions ||
+                response == null ||
+                response.lineBarSpots == null) return;
+
+            setState(() {
+              final spot = response.lineBarSpots!.first;
+              if (_selectedRange == EnergyRange.monthly) {
+                _selectedDateFromChart =
+                    DateTime(DateTime.now().year, _selectedMonth, spot.x.toInt());
+              } else if (_selectedRange == EnergyRange.weekly) {
+                _selectedDateFromChart =
+                    _selectedWeekStart.add(Duration(days: spot.x.toInt()));
+              } else {
+                _selectedDateFromChart = DateTime(
+                    _selectedDate.year, _selectedDate.month, _selectedDate.day, spot.x.toInt());
+              }
+            });
+          },
+        ),
       ),
     );
   }

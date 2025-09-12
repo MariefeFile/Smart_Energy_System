@@ -72,4 +72,5 @@ List<ConnectedDevice> connectedDevices = [
       status: "Off",
       usage: 18.6,
       percent: 0.14),
+      
 ];
