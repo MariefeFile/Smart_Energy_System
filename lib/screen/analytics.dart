@@ -247,10 +247,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                 child: Container(
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -493,7 +493,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
         unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-        backgroundColor: Colors.black.withOpacity(0.4),
+        backgroundColor: Colors.black.withValues(alpha: 0.4),
         currentIndex: 2,
         onTap: (index) {
           if (index == 2) return;
@@ -542,7 +542,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -578,7 +578,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),
@@ -688,7 +688,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             barWidth: 3,
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.teal.withOpacity(0.2),
+              color: Colors.teal.withValues(alpha: 0.2),
             ),
             dotData: FlDotData(show: true),
           ),

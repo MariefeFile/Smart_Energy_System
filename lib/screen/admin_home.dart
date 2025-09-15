@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'analytics.dart';
 import 'explore.dart';
 import 'schedule.dart';
@@ -7,6 +8,8 @@ import 'profile.dart';
 import 'connected_devices.dart';
 
 
+enum EnergyPeriod { daily, weekly, monthly }
+EnergyPeriod _selectedPeriod = EnergyPeriod.daily;
 
 class HomeScreen extends StatefulWidget {
   final int initialIndex;
@@ -33,13 +36,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // Sidebar animation
     _sidebarController = AnimationController(
-  duration: const Duration(milliseconds: 400),
-  vsync: this,
-);
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
     _slideAnimation = Tween<Offset>(
-  begin: const Offset(1.0, 0.0), // off-screen right
-  end: Offset.zero,
-).animate(CurvedAnimation(parent: _sidebarController, curve: Curves.easeInOut));
+      begin: const Offset(1.0, 0.0), // off-screen right
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _sidebarController, curve: Curves.easeInOut));
 
     // Overlay fade animation
     _overlayController = AnimationController(
@@ -152,84 +155,63 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
                       IconButton(
-  icon: const Icon(Icons.notifications, color: Colors.teal),
-  onPressed: () {},
-),
-
-IconButton(
-  icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode, color: Colors.teal),
-  onPressed: () {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-  },
-),
-
-
-GestureDetector(
-  onTap: _toggleFeatures,
-  child: AnimatedContainer(
-    duration: const Duration(milliseconds: 300),
-    margin: const EdgeInsets.symmetric(horizontal: 8),
-    padding: const EdgeInsets.all(6),
-    decoration: BoxDecoration(
-      color: Colors.teal,
-      borderRadius: BorderRadius.circular(8),
-      boxShadow: _sidebarController.isCompleted
-          ? [
-              // Main glow
-              BoxShadow(
-                color: Colors.tealAccent.withValues(alpha: 0.7),
-                blurRadius: 10,
-                spreadRadius: 1,
-                offset: const Offset(0, 0),
-              ),
-              // Top-left shadow for depth
-              BoxShadow(
-                color: Colors.teal.withValues(alpha: 0.5),
-                blurRadius: 6,
-                offset: const Offset(-2, -2),
-              ),
-              // Bottom-right shadow for depth
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 6,
-                offset: const Offset(2, 2),
-              ),
-            ]
-          : [
-              // subtle 3D shadow when inactive
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 4,
-                offset: const Offset(2, 2),
-              ),
-            ],
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(3, (i) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(3, (j) {
-            return Container(
-              margin: const EdgeInsets.all(1.5),
-              width: 3,
-              height: 3,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-            );
-          }),
-        );
-      }),
-    ),
-  ),
-),
-
-
-                      // Profile avatar
+                        icon: const Icon(Icons.notifications, color: Colors.teal),
+                        onPressed: () {},
+                      ),
+                      IconButton(
+                        icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode, color: Colors.teal),
+                        onPressed: () {
+                          setState(() {
+                            _isDarkMode = !_isDarkMode;
+                          });
+                        },
+                      ),
+                      GestureDetector(
+                        onTap: _toggleFeatures,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          margin: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.teal,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: _sidebarController.isCompleted
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.tealAccent.withAlpha((0.7 * 255).round()),
+                                      blurRadius: 10,
+                                      spreadRadius: 1,
+                                    ),
+                                  ]
+                                : [
+                                    BoxShadow(
+                                      color: Colors.black.withAlpha((0.2 * 255).round()),
+                                      blurRadius: 4,
+                                      offset: const Offset(2, 2),
+                                    ),
+                                  ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(3, (i) {
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: List.generate(3, (j) {
+                                  return Container(
+                                    margin: const EdgeInsets.all(1.5),
+                                    width: 3,
+                                    height: 3,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  );
+                                }),
+                              );
+                            }),
+                          ),
+                        ),
+                      ),
                       GestureDetector(
                         onTap: _toggleProfile,
                         child: const CircleAvatar(
@@ -279,32 +261,29 @@ GestureDetector(
             ),
           ),
           // Sidebar
-         SlideTransition(
-  position: _slideAnimation, // use the field instead of a new Tween
-  child: Align(
-    alignment: Alignment.centerRight,
-    child: Container(
-      width: 250,
-      height: double.infinity,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 80),
-              Expanded(child: ListView(children: _buildFeaturesList())),
-            ],
+          SlideTransition(
+            position: _slideAnimation,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                width: 250,
+                height: double.infinity,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 80),
+                        Expanded(child: ListView(children: _buildFeaturesList())),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
-    ),
-  ),
-),
-
-
-
-          // Profile Panel (pop out from person icon)
+          // Profile Panel
           Align(
             alignment: Alignment.topRight,
             child: FadeTransition(
@@ -353,27 +332,10 @@ GestureDetector(
                       const SizedBox(height: 4),
                       const Text('marie@example.com', style: TextStyle(color: Colors.white70, fontSize: 12)),
                       const SizedBox(height: 12),
-                      InkWell(
-                        onTap: () {
-                          _closeProfile(); // close the popover first
-                          Future.delayed(const Duration(milliseconds: 300), () {
-                            if (!mounted) return;
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const EnergyProfileScreen()),
-                            );
-                          });
-                        },
-                        child: const Text(
-                          'View Profile',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
                       ElevatedButton(
                         onPressed: _closeProfile,
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            minimumSize: const Size.fromHeight(36)),
+                            backgroundColor: Colors.teal, minimumSize: const Size.fromHeight(36)),
                         child: const Text('Close'),
                       ),
                     ],
@@ -382,8 +344,6 @@ GestureDetector(
               ),
             ),
           ),
-         
-
         ],
       ),
       bottomNavigationBar: _buildBottomNavBar(),
@@ -501,133 +461,228 @@ GestureDetector(
     );
   }
 
-  Widget _energyConsumptionChart() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with time period buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Energy Consumption', 
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
-              Row(
-                children: [
-                  _timePeriodButton('Today', true),
-                  const SizedBox(width: 8),
-                  _timePeriodButton('Week', false),
-                  const SizedBox(width: 8),
-                  _timePeriodButton('Month', false),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Graph area
-          Container(
-            height: 120,
-            decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8)),
-            child: const Center(child: Text('Graph Placeholder', style: TextStyle(color: Colors.white70))),
-          ),
-          const SizedBox(height: 12),
-          // Time axis
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text('12 AM', style: TextStyle(color: Colors.white70, fontSize: 12)),
-              Text('3 AM', style: TextStyle(color: Colors.white70, fontSize: 12)),
-              Text('6 AM', style: TextStyle(color: Colors.white70, fontSize: 12)),
-              Text('9 AM', style: TextStyle(color: Colors.white70, fontSize: 12)),
-              Text('12 PM', style: TextStyle(color: Colors.white70, fontSize: 12)),
-              Text('3 PM', style: TextStyle(color: Colors.white70, fontSize: 12)),
-              Text('6 PM', style: TextStyle(color: Colors.white70, fontSize: 12)),
-              Text('9 PM', style: TextStyle(color: Colors.white70, fontSize: 12)),
-              Text('12 AM', style: TextStyle(color: Colors.white70, fontSize: 12)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Peak and Lowest usage cards
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(25),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('Peak Usage', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                      SizedBox(height: 4),
-                      Text('3.8 kWh at 3:15 PM', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(25),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('Lowest Usage', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                      SizedBox(height: 4),
-                      Text('0.8 kWh at 4:00 AM', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // ---------------------- Energy Consumption Chart ----------------------
+ Widget _energyConsumptionChart() {
+  double screenWidth = MediaQuery.of(context).size.width;
 
-  // Helper method for time period buttons
-  Widget _timePeriodButton(String label, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.teal : Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? Colors.white : Colors.white70,
-          fontSize: 12,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.all(screenWidth * 0.04),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Energy Consumption',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: screenWidth * 0.04,
+                    color: Colors.white)),
+            Row(
+              children: [
+                _timePeriodButton('Daily', EnergyPeriod.daily, screenWidth),
+                SizedBox(width: screenWidth * 0.02),
+                _timePeriodButton('Weekly', EnergyPeriod.weekly, screenWidth),
+                SizedBox(width: screenWidth * 0.02),
+                _timePeriodButton('Monthly', EnergyPeriod.monthly, screenWidth),
+              ],
+            )
+          ],
         ),
-      ),
-    );
-  }
-
- Widget _connectedDevicesSection() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text('Connected Devices', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      const SizedBox(height: 12),
-      ...connectedDevices.map((device) => _deviceTile(device.icon, device.name, device.status)).toList(),
-    ],
+        SizedBox(height: 10),
+        SizedBox(
+          height: screenWidth * 0.5, // chart height relative to width
+          child: _buildEnergyChart(),
+        ),
+        SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.all(screenWidth * 0.02),
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(25),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Peak Usage',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: screenWidth * 0.03)),
+                    SizedBox(height: 4),
+                    Text('3.8 kWh at 3:15 PM',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: screenWidth * 0.035)),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: screenWidth * 0.03),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.all(screenWidth * 0.02),
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(25),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Lowest Usage',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: screenWidth * 0.03)),
+                    SizedBox(height: 4),
+                    Text('0.8 kWh at 4:00 AM',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: screenWidth * 0.035)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
   );
 }
+
+
+Widget _buildEnergyChart() {
+  List<FlSpot> spots = [];
+  List<String> labels = [];
+
+  switch (_selectedPeriod) {
+    case EnergyPeriod.daily:
+      spots = List.generate(24, (h) => FlSpot((h + 1).toDouble(), 5 + (h % 6) * 3));
+      labels = List.generate(24, (h) => '${h + 1}'); // 1 to 24 hours
+      break;
+
+    case EnergyPeriod.weekly:
+      List<String> weekDays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      spots = List.generate(7, (i) => FlSpot((i + 1).toDouble(), 10 + (i % 5) * 2));
+      labels = weekDays;
+      break;
+
+    case EnergyPeriod.monthly:
+      int daysInMonth = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
+      spots = List.generate(daysInMonth, (i) => FlSpot((i + 1).toDouble(), 8 + (i % 10)));
+      labels = List.generate(daysInMonth, (i) => '${i + 1}');
+      break;
+  }
+
+  return LineChart(
+    LineChartData(
+      minX: 1,
+      maxX: spots.last.x,
+      minY: 0,
+      maxY: (spots.map((e) => e.y).reduce((a, b) => a > b ? a : b) * 1.2),
+      titlesData: FlTitlesData(
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            interval: _selectedPeriod == EnergyPeriod.daily ? 3 : 1,
+            getTitlesWidget: (value, _) {
+              int index = value.toInt() - 1; // subtract 1 to match labels
+              if (index >= 0 && index < labels.length) {
+                return Text(labels[index], style: const TextStyle(color: Colors.white70, fontSize: 10));
+              }
+              return const Text('');
+            },
+          ),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            interval: 5,
+            getTitlesWidget: (value, _) => Text('${value.toInt()}', style: const TextStyle(color: Colors.white70, fontSize: 10)),
+          ),
+        ),
+        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      ),
+      gridData: FlGridData(
+        show: true,
+        drawHorizontalLine: true,
+        drawVerticalLine: true,
+        horizontalInterval: 5,
+        verticalInterval: _selectedPeriod == EnergyPeriod.daily ? 3 : 1,
+        getDrawingHorizontalLine: (value) => FlLine(color: Colors.white.withValues(alpha: 0.1), strokeWidth: 1),
+        getDrawingVerticalLine: (value) => FlLine(color: Colors.white.withValues(alpha: 0.1), strokeWidth: 1),
+      ),
+      borderData: FlBorderData(show: true, border: Border.all(color: Colors.white.withValues(alpha: 0.2))),
+      lineBarsData: [
+        LineChartBarData(
+          spots: spots,
+          isCurved: true,
+          color: Colors.teal,
+          barWidth: 3,
+          belowBarData: BarAreaData(show: true, color: Colors.teal.withValues(alpha: 0.2)),
+          dotData: FlDotData(show: true),
+        ),
+      ],
+      lineTouchData: LineTouchData(
+        handleBuiltInTouches: true,
+        touchTooltipData: LineTouchTooltipData(
+          tooltipBgColor: Colors.teal,
+          getTooltipItems: (touchedSpots) {
+            return touchedSpots.map((t) {
+              int index = t.x.toInt() - 1; // match labels
+              String label = labels[index];
+              return LineTooltipItem('$label\n${t.y.toStringAsFixed(1)} kWh', const TextStyle(color: Colors.white, fontSize: 12));
+            }).toList();
+          },
+        ),
+      ),
+    ),
+  );
+}
+
+
+  // ---------------------- Helper Widgets ----------------------
+Widget _timePeriodButton(String label, EnergyPeriod period, double screenWidth) {
+  final bool isSelected = _selectedPeriod == period;
+  return SizedBox(
+    width: screenWidth * 0.15, // responsive width
+    height: screenWidth * 0.08, // responsive height
+    child: ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSelected ? Colors.green : Colors.grey,
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      ),
+      onPressed: () => setState(() => _selectedPeriod = period),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: screenWidth * 0.03),
+      ),
+    ),
+  );
+}
+
+
+  Widget _connectedDevicesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Connected Devices', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        ...connectedDevices.map((device) => _deviceTile(device.icon, device.name, device.status)).toList(),
+      ],
+    );
+  }
 
   Widget _deviceTile(IconData icon, String title, String status) {
     return Container(
@@ -692,147 +747,99 @@ GestureDetector(
     );
   }
 
-List<Widget> _buildFeaturesList() {
-  final features = [
-    {"icon": Icons.devices, "title": "Devices", "screen": const DevicesTab()},
-    {"icon": Icons.show_chart, "title": "Analytics", "screen": const AnalyticsScreen()},
-    {"icon": Icons.schedule, "title": "Scheduling", "screen": const EnergySchedulingScreen()},
-    {"icon": Icons.settings, "title": "Settings", "screen": const EnergySettingScreen()},
-    {"icon": Icons.menu_book, "title": "Guidelines"}, // no screen, toggle dropdown
-  ];
+  List<Widget> _buildFeaturesList() {
+    final features = [
+      {"icon": Icons.devices, "title": "Devices", "screen": const DevicesTab()},
+      {"icon": Icons.show_chart, "title": "Analytics", "screen": const AnalyticsScreen()},
+      {"icon": Icons.schedule, "title": "Scheduling", "screen": const EnergySchedulingScreen()},
+      {"icon": Icons.settings, "title": "Settings", "screen": const EnergySettingScreen()},
+      {"icon": Icons.menu_book, "title": "Guidelines"}, // no screen, toggle dropdown
+    ];
 
-  return [
-    // Floating panel container
-    Padding(
-      padding: const EdgeInsets.all(12),
-      child: Container(
+    return [
+      Padding(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-    colors: [
-      Color.fromARGB(255, 31, 94, 196).withValues(alpha: 0.6),
-      Color.fromARGB(255, 41, 40, 75).withValues(alpha: 0.6),
-    ],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black45,
-              blurRadius: 8,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title inside the panel
-            Row(
-              children: const [
-               
-                Text(
-                  "Explore More",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.fromARGB(255, 31, 94, 196).withValues(alpha: 0.6),
+                Color.fromARGB(255, 41, 40, 75).withValues(alpha: 0.6),
               ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            const SizedBox(height: 12),
-            // Grid of icons
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: features.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 1.0,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 8, offset: Offset(0, 4))],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Explore More",
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              itemBuilder: (context, index) {
-                final feature = features[index];
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        if (feature["title"] == "Guidelines") {
-                          setState(() {
-                            _showGuidelines = !_showGuidelines;
-                          });
-                        } else {
-                          selectFeature(
-                              feature["title"] as String,
-                              feature["screen"] as Widget);
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(50),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          feature["icon"] as IconData,
-                          color: Colors.tealAccent,
-                          size: 24,
+              const SizedBox(height: 12),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: features.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 1.0,
+                ),
+                itemBuilder: (context, index) {
+                  final feature = features[index];
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          if (feature["title"] == "Guidelines") {
+                            setState(() {
+                              _showGuidelines = !_showGuidelines;
+                            });
+                          } else {
+                            selectFeature(feature["title"] as String, feature["screen"] as Widget);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(50),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(feature["icon"] as IconData, color: Colors.tealAccent, size: 24),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      feature["title"] as String,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13),
-                    ),
-                  ],
-                );
-              },
-            ),
-            // Guidelines dropdown
-            if (_showGuidelines)
-              Padding(
-                padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      "⚡ Save energy by turning off unused appliances.",
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      "🌞 Use natural light during daytime.",
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      "❄️ Optimize air conditioning usage.",
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      "🔌 Unplug chargers when not in use.",
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                  ],
-                ),
+                      const SizedBox(height: 4),
+                      Text(feature["title"] as String,
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                    ],
+                  );
+                },
               ),
-          ],
+              if (_showGuidelines)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text("⚡ Save energy by turning off unused appliances.",
+                          style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text("🌞 Use natural light during daytime.", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text("❄️ Optimize air conditioning usage.", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text("🔌 Unplug chargers when not in use.", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
-    ),
-  ];
-}
-
-
-
+    ];
+  }
 }
