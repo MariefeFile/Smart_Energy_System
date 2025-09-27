@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:smartenergy_app/screen/explore.dart';
-import 'package:smartenergy_app/screen/schedule.dart';
-import 'package:smartenergy_app/screen/settings.dart';
 import 'package:smartenergy_app/screen/profile.dart';
-import 'package:smartenergy_app/screen/admin_home.dart';
 import 'connected_devices.dart';
+import 'custom_bottom_nav.dart';
 
 enum EnergyRange { daily, weekly, monthly }
 
@@ -348,7 +345,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                         ],
                       ),
                       const SizedBox(height: 24),
-                      // Connected devices breakdown dynamically updated
                       if (_selectedDateFromChart != null) ...[
                         Text(
                           'Devices on ${_monthNames[_selectedDateFromChart!.month - 1]} '
@@ -390,7 +386,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               ),
             ],
           ),
-          // Profile popup unchanged
           Positioned(
             top: 70,
             right: 12,
@@ -489,47 +484,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-        backgroundColor: Colors.black.withValues(alpha: 0.4),
+      bottomNavigationBar: CustomBottomNav(
         currentIndex: 2,
-        onTap: (index) {
-          if (index == 2) return;
-          Widget page;
-          switch (index) {
-            case 0:
-              page = const HomeScreen();
-              break;
-            case 1:
-              page = const DevicesTab();
-              break;
-            case 3:
-              page = const EnergySchedulingScreen();
-              break;
-            case 4:
-              page = const EnergySettingScreen();
-              break;
-            case 5:
-              page = const EnergyProfileScreen();
-              break;
-            default:
-              page = const HomeScreen();
+        onTap: (index, page) {
+          if (index != 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => page),
+            );
           }
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => page),
-          );
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
-          BottomNavigationBarItem(icon: Icon(Icons.devices), label: 'Devices'),
-          BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
-          BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
       ),
     );
   }
@@ -607,7 +571,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                 LinearProgressIndicator(
                   value: percent,
                   color: const Color(0xFF10b981),
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: Colors.grey,
                   minHeight: 6,
                 ),
               ],

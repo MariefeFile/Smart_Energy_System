@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'admin_home.dart';
-import 'explore.dart';
-import 'analytics.dart';
-import 'schedule.dart';
-import 'settings.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'login.dart';
+import 'package:google_sign_in/google_sign_in.dart'; // ✅ Import Google Sign-In
+import 'login.dart'; // ✅ Import your actual login page (replace AuthPage)
+
+import 'custom_bottom_nav.dart'; // ✅ Import your custom nav
 
 class EnergyProfileScreen extends StatefulWidget {
   const EnergyProfileScreen({super.key});
@@ -36,35 +33,14 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
     super.dispose();
   }
 
-  void _onTabTapped(int index) {
-    if (index == _currentIndex) return;
-
+  void _onTabTapped(int index, Widget page) {
+    if (index == _currentIndex) return; // prevent reloading same page
     setState(() => _currentIndex = index);
 
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-        break;
-      case 1:
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const DevicesTab()));
-        break;
-      case 2:
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const AnalyticsScreen()));
-        break;
-      case 3:
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (_) => const EnergySchedulingScreen()));
-        break;
-      case 4:
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (_) => const EnergySettingScreen()));
-        break;
-      case 5:
-        break;
-    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => page),
+    );
   }
 
   @override
@@ -72,7 +48,7 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // ✅ Gradient background matching admin_home.dart
+          // ✅ Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -85,7 +61,6 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
               ),
             ),
           ),
-          // Main content
           SafeArea(
             child: Column(
               children: [
@@ -106,21 +81,11 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.tealAccent,
-        unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-        backgroundColor: Colors.black.withAlpha((255 * 0.4).toInt()),
+
+      // ✅ Use custom bottom nav
+      bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
-          BottomNavigationBarItem(icon: Icon(Icons.devices), label: 'Devices'),
-          BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
-          BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
       ),
     );
   }
@@ -163,7 +128,6 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
 
   Widget _buildProfileCard() {
     return Container(
-      
       margin: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -182,7 +146,6 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
         padding: const EdgeInsets.all(25),
         child: Column(
           children: [
-            
             // Profile Header
             Row(
               children: [
@@ -191,7 +154,8 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
                   height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF4ECDC4), width: 3),
+                    border:
+                        Border.all(color: const Color(0xFF4ECDC4), width: 3),
                   ),
                   child: ClipOval(
                     child: Image.asset(
@@ -200,7 +164,8 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
                       errorBuilder: (context, error, stackTrace) {
                         return const CircleAvatar(
                           backgroundColor: Color(0xFF4ECDC4),
-                          child: Icon(Icons.person, size: 40, color: Colors.white),
+                          child: Icon(Icons.person,
+                              size: 40, color: Colors.white),
                         );
                       },
                     ),
@@ -211,8 +176,6 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
-                      
                       const Text(
                         'Marie Fe Tapales',
                         style: TextStyle(
@@ -239,9 +202,8 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
                 ),
               ],
             ),
-            
             const SizedBox(height: 30),
-            
+
             // Energy Stats Section
             const Align(
               alignment: Alignment.centerLeft,
@@ -254,22 +216,21 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
                 ),
               ),
             ),
-            
             const SizedBox(height: 20),
-            
+
             // Stats Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Column(
-                   children: [
-          _buildStatItem('Current Energy Usage', '350'),
-          const SizedBox(height: 15),
-          _buildStatItem('Monthly Savings', '₱25'), // ✅ Peso sign here
-          const SizedBox(height: 15),
-          _buildStatItem('Carbon Reduction', '120'),
-        ],
+                    children: [
+                      _buildStatItem('Current Energy Usage', '350'),
+                      const SizedBox(height: 15),
+                      _buildStatItem('Monthly Savings', '₱25'),
+                      const SizedBox(height: 15),
+                      _buildStatItem('Carbon Reduction', '120'),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 30),
@@ -283,7 +244,8 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
                       child: CircularProgressIndicator(
                         value: 0.7,
                         strokeWidth: 8,
-                        backgroundColor: Colors.white.withAlpha((0.2 * 255).toInt()),
+                        backgroundColor:
+                            Colors.white.withAlpha((0.2 * 255).toInt()),
                         valueColor: const AlwaysStoppedAnimation<Color>(
                           Color(0xFF10b981),
                         ),
@@ -370,9 +332,8 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
           _buildMenuItem(Icons.bar_chart, 'View Energy History', () {}),
           _buildDivider(),
           _buildMenuItem(Icons.settings, 'Manage Smart Devices', () {}),
-          
           const SizedBox(height: 20),
-          
+
           // Help & Support and Logout
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -396,7 +357,8 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6B6B),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -409,7 +371,6 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
               ],
             ),
           ),
-          
           const SizedBox(height: 20),
         ],
       ),
@@ -434,8 +395,8 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
           color: Colors.white,
         ),
       ),
-      trailing: Icon(Icons.arrow_forward_ios, 
-        color: Colors.grey[400], size: 16),
+      trailing:
+          Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 16),
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 25),
     );
@@ -444,66 +405,64 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
   Widget _buildDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: Divider(color: Colors.white.withAlpha((0.2 * 255).toInt()), height: 1),
+      child:
+          Divider(color: Colors.white.withAlpha((0.2 * 255).toInt()), height: 1),
     );
   }
 
   void _showLogoutDialog() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: const Color(0xFF1e293b),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: const Text(
-          'Logout',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          'Are you sure you want to logout?',
-          style: TextStyle(color: Colors.grey),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey[400]),
-            ),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1e293b),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop(); // Close dialog first
+          title: const Text(
+            'Logout',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(color: Colors.grey),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey[400]),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close dialog first
 
-              // ✅ If using Google Sign-In
-              try {
-                final googleSignIn = GoogleSignIn();
-                await googleSignIn.signOut();
-              } catch (e) {
-                debugPrint("Google sign out error: $e");
-              }
+                try {
+                  final googleSignIn = GoogleSignIn();
+                  await googleSignIn.signOut();
+                } catch (e) {
+                  debugPrint("Google sign out error: $e");
+                }
 
-              // ✅ Navigate to AuthPage and clear back stack
-              if (mounted) {
+                if (!mounted) return;
+
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => const AuthPage()),
+                  MaterialPageRoute(builder: (_) => const AuthPage()), // ✅ FIXED
                   (route) => false,
                 );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF6B6B),
-              foregroundColor: Colors.white,
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6B6B),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Logout'),
             ),
-            child: const Text('Logout'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
+          ],
+        );
+      },
+    );
+  }
 }

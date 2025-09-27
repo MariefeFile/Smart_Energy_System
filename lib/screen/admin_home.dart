@@ -4,9 +4,9 @@ import 'analytics.dart';
 import 'explore.dart';
 import 'schedule.dart';
 import 'settings.dart';
-import 'profile.dart';
 import 'connected_devices.dart';
-
+import 'custom_bottom_nav.dart';
+import 'custom_header.dart';
 
 enum EnergyPeriod { daily, weekly, monthly }
 EnergyPeriod _selectedPeriod = EnergyPeriod.daily;
@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late int _currentIndex;
   bool _isDarkMode = false;
   bool _showGuidelines = false;
+
   late AnimationController _sidebarController;
   late AnimationController _overlayController;
   late AnimationController _profileController;
@@ -34,17 +35,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
     _currentIndex = widget.initialIndex;
 
-    // Sidebar animation
     _sidebarController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0), // off-screen right
+      begin: const Offset(1.0, 0.0),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _sidebarController, curve: Curves.easeInOut));
 
-    // Overlay fade animation
     _overlayController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -53,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       CurvedAnimation(parent: _overlayController, curve: Curves.easeInOut),
     );
 
-    // Profile pop-out animation
     _profileController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -68,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  // Sidebar controls
   void _openFeatures() {
     _overlayController.forward();
     _sidebarController.forward();
@@ -86,14 +85,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  void _openProfile() {
-    _profileController.forward();
-  }
-
-  void _closeProfile() {
-    _profileController.reverse();
-  }
-
+  // Profile dropdown controls
+  void _openProfile() => _profileController.forward();
+  void _closeProfile() => _profileController.reverse();
   void _toggleProfile() {
     if (_profileController.isCompleted) {
       _closeProfile();
@@ -102,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
+  // Navigate from features
   void selectFeature(String featureName, Widget screen) {
     _closeFeatures();
     Future.delayed(const Duration(milliseconds: 300), () {
@@ -115,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient background
+          // Background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -125,105 +120,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-          // Main content
+
           Column(
             children: [
-              SafeArea(
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(200),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(25),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 16),
-                      const Expanded(
-                        child: Text(
-                          'Smart Energy System',
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.notifications, color: Colors.teal),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode, color: Colors.teal),
-                        onPressed: () {
-                          setState(() {
-                            _isDarkMode = !_isDarkMode;
-                          });
-                        },
-                      ),
-                      GestureDetector(
-                        onTap: _toggleFeatures,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: const EdgeInsets.symmetric(horizontal: 8),
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.teal,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: _sidebarController.isCompleted
-                                ? [
-                                    BoxShadow(
-                                      color: Colors.tealAccent.withAlpha((0.7 * 255).round()),
-                                      blurRadius: 10,
-                                      spreadRadius: 1,
-                                    ),
-                                  ]
-                                : [
-                                    BoxShadow(
-                                      color: Colors.black.withAlpha((0.2 * 255).round()),
-                                      blurRadius: 4,
-                                      offset: const Offset(2, 2),
-                                    ),
-                                  ],
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: List.generate(3, (i) {
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: List.generate(3, (j) {
-                                  return Container(
-                                    margin: const EdgeInsets.all(1.5),
-                                    width: 3,
-                                    height: 3,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  );
-                                }),
-                              );
-                            }),
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: _toggleProfile,
-                        child: const CircleAvatar(
-                          backgroundColor: Colors.teal,
-                          child: Icon(Icons.person, color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                    ],
-                  ),
-                ),
+              // ✅ Use CustomHeader instead of old SafeArea
+              CustomHeader(
+                isDarkMode: _isDarkMode,
+                isSidebarOpen: _sidebarController.isCompleted,
+                onToggleDarkMode: () {
+                  setState(() {
+                    _isDarkMode = !_isDarkMode;
+                  });
+                },
+                onToggleFeatures: _toggleFeatures,
+                onToggleProfile: _toggleProfile,
               ),
+
+              // Dashboard Content
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
@@ -249,7 +162,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ],
           ),
-          // Overlay for sidebar
+
+          // Sidebar overlay
           IgnorePointer(
             ignoring: _sidebarController.status != AnimationStatus.completed,
             child: FadeTransition(
@@ -260,7 +174,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-          // Sidebar
+
+          // Sidebar slide-in
           SlideTransition(
             position: _slideAnimation,
             child: Align(
@@ -283,7 +198,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-          // Profile Panel
+
+          // Profile dropdown
           Align(
             alignment: Alignment.topRight,
             child: FadeTransition(
@@ -335,7 +251,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ElevatedButton(
                         onPressed: _closeProfile,
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal, minimumSize: const Size.fromHeight(36)),
+                          backgroundColor: Colors.teal,
+                          minimumSize: const Size.fromHeight(36),
+                        ),
                         child: const Text('Close'),
                       ),
                     ],
@@ -346,56 +264,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavBar(),
+      bottomNavigationBar: CustomBottomNav(
+        currentIndex: _currentIndex,
+        onTap: (index, page) {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => page));
+        },
+      ),
     );
   }
-
-  // ---------------------- Bottom Nav Bar ----------------------
-  Widget _buildBottomNavBar() {
-    return BottomNavigationBar(
-      currentIndex: _currentIndex,
-      selectedItemColor: Colors.teal,
-      unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-      backgroundColor: Colors.black.withAlpha(100),
-      showUnselectedLabels: true,
-      type: BottomNavigationBarType.fixed,
-      onTap: (index) {
-        Widget page;
-        switch (index) {
-          case 0:
-            page = const HomeScreen();
-            break;
-          case 1:
-            page = const DevicesTab();
-            break;
-          case 2:
-            page = const AnalyticsScreen();
-            break;
-          case 3:
-            page = const EnergySchedulingScreen();
-            break;
-          case 4:
-            page = const EnergySettingScreen();
-            break;
-          case 5:
-            page = const EnergyProfileScreen();
-            break;
-          default:
-            page = const HomeScreen();
-        }
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => page));
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
-        BottomNavigationBarItem(icon: Icon(Icons.devices), label: 'Devices'),
-        BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
-        BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-      ],
-    );
-  }
-
   // ---------------------- Dashboard Cards & Sections ----------------------
   Widget _currentEnergyCard() {
     return Container(
@@ -467,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   return Container(
     width: double.infinity,
-    padding: EdgeInsets.all(screenWidth * 0.04),
+    padding: EdgeInsets.all(screenWidth * 0.02), // smaller padding
     decoration: BoxDecoration(
       gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
       borderRadius: BorderRadius.circular(12),
@@ -475,78 +351,89 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Title + Buttons
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Energy Consumption',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: screenWidth * 0.04,
-                    color: Colors.white)),
-            Row(
-              children: [
-                _timePeriodButton('Daily', EnergyPeriod.daily, screenWidth),
-                SizedBox(width: screenWidth * 0.02),
-                _timePeriodButton('Weekly', EnergyPeriod.weekly, screenWidth),
-                SizedBox(width: screenWidth * 0.02),
-                _timePeriodButton('Monthly', EnergyPeriod.monthly, screenWidth),
-              ],
-            )
-          ],
-        ),
-        SizedBox(height: 10),
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    Text(
+      'Energy Consumption',
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: screenWidth * 0.0110, // 🔽 smaller title text
+        color: Colors.white,
+      ),
+    ),
+    Row(
+      children: [
+        _timePeriodButton('Daily', EnergyPeriod.daily, screenWidth * 0.5),   // 🔽 smaller button
+        SizedBox(width: screenWidth * 0.02),
+        _timePeriodButton('Weekly', EnergyPeriod.weekly, screenWidth * 0.5), // 🔽 smaller button
+        SizedBox(width: screenWidth * 0.02),
+        _timePeriodButton('Monthly', EnergyPeriod.monthly, screenWidth * 0.5),
+      ],
+    )
+  ],
+),
+const SizedBox(height: 4), // 🔽 tighter spacing
+        // Smaller Graph
         SizedBox(
-          height: screenWidth * 0.5, // chart height relative to width
-          child: _buildEnergyChart(),
+          height: screenWidth * 0.10, // smaller chart height
+          child: _buildEnergyChart(), // also make _buildEnergyChart small
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 8),
+
+        // Peak & Lowest usage cards
         Row(
           children: [
             Expanded(
               child: Container(
-                padding: EdgeInsets.all(screenWidth * 0.02),
+                padding: EdgeInsets.all(screenWidth * 0.012),
                 decoration: BoxDecoration(
                   color: Colors.white.withAlpha(25),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Peak Usage',
                         style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: screenWidth * 0.03)),
-                    SizedBox(height: 4),
+                          color: Colors.white70,
+                          fontSize: screenWidth * 0.010, // smaller label
+                        )),
+                    const SizedBox(height: 2),
                     Text('3.8 kWh at 3:15 PM',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: screenWidth * 0.035)),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: screenWidth * 0.010,// smaller value
+                        )),
                   ],
                 ),
               ),
             ),
-            SizedBox(width: screenWidth * 0.03),
+            SizedBox(width: screenWidth * 0.012),
             Expanded(
               child: Container(
-                padding: EdgeInsets.all(screenWidth * 0.02),
+                padding: EdgeInsets.all(screenWidth * 0.012),
                 decoration: BoxDecoration(
                   color: Colors.white.withAlpha(25),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Lowest Usage',
                         style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: screenWidth * 0.03)),
-                    SizedBox(height: 4),
+                          color: Colors.white70,
+                          fontSize: screenWidth * 0.010,
+                        )),
+                    const SizedBox(height: 2),
                     Text('0.8 kWh at 4:00 AM',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: screenWidth * 0.035)),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: screenWidth * 0.010,
+                        )),
                   ],
                 ),
               ),
@@ -557,6 +444,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ),
   );
 }
+
 
 
 Widget _buildEnergyChart() {
@@ -651,26 +539,37 @@ Widget _buildEnergyChart() {
 
 
   // ---------------------- Helper Widgets ----------------------
-Widget _timePeriodButton(String label, EnergyPeriod period, double screenWidth) {
-  final bool isSelected = _selectedPeriod == period;
-  return SizedBox(
-    width: screenWidth * 0.15, // responsive width
-    height: screenWidth * 0.08, // responsive height
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected ? Colors.green : Colors.grey,
-        padding: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+Widget _timePeriodButton(String text, EnergyPeriod period, double screenWidth) {
+  return GestureDetector(
+    onTap: () {
+      setState(() {
+        _selectedPeriod = period;
+      });
+    },
+    child: Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: screenWidth * 0.018, // tighter padding
+        vertical: screenWidth * 0.006,
       ),
-      onPressed: () => setState(() => _selectedPeriod = period),
+      decoration: BoxDecoration(
+        color: _selectedPeriod == period
+            ? Colors.blue
+            : Colors.white.withAlpha(30),
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: screenWidth * 0.03),
+        text,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: screenWidth * 0.022, // smaller button text
+        ),
       ),
     ),
   );
 }
+
+
+
 
 
   Widget _connectedDevicesSection() {
@@ -679,7 +578,7 @@ Widget _timePeriodButton(String label, EnergyPeriod period, double screenWidth) 
       children: [
         const Text('Connected Devices', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        ...connectedDevices.map((device) => _deviceTile(device.icon, device.name, device.status)).toList(),
+        ...connectedDevices.map((device) => _deviceTile(device.icon, device.name, device.status)),
       ],
     );
   }

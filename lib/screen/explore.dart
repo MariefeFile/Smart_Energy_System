@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:smartenergy_app/screen/analytics.dart';
-import 'package:smartenergy_app/screen/schedule.dart';
-import 'package:smartenergy_app/screen/settings.dart';
 import 'package:smartenergy_app/screen/profile.dart';
-import 'package:smartenergy_app/screen/admin_home.dart';
 import 'chatbot.dart';
 import 'connected_devices.dart';
+import 'custom_bottom_nav.dart';
 
 class DevicesTab extends StatefulWidget {
   const DevicesTab({super.key});
@@ -581,46 +578,17 @@ class _DevicesTabState extends State<DevicesTab> with TickerProviderStateMixin {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-        backgroundColor: Colors.black.withAlpha(100),
-        showUnselectedLabels: true,
-        currentIndex: 1,
-        onTap: (index) {
-          if (index == 1) return;
-          Widget page;
-          switch (index) {
-            case 0:
-              page = const HomeScreen();
-              break;
-            case 2:
-              page = const AnalyticsScreen();
-              break;
-            case 3:
-              page = const EnergySchedulingScreen();
-              break;
-            case 4:
-              page = const EnergySettingScreen();
-              break;
-            case 5:
-              page = const EnergyProfileScreen();
-              break;
-            default:
-              page = const HomeScreen();
-          }
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => page));
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
-          BottomNavigationBarItem(icon: Icon(Icons.devices), label: 'Devices'),
-          BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
-          BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-      ),
+      bottomNavigationBar: CustomBottomNav(
+  currentIndex: 1, // since this is Devices
+  onTap: (index, page) {
+    if (index == 1) return; // already on Devices
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => page),
+    );
+  },
+),
+
     );
   }
 }

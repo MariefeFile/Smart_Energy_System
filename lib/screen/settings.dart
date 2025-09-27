@@ -4,6 +4,7 @@ import 'explore.dart';
 import 'analytics.dart';
 import 'schedule.dart';
 import 'profile.dart';
+import 'custom_bottom_nav.dart';
 
 class EnergySettingScreen extends StatefulWidget {
   const EnergySettingScreen({super.key});
@@ -112,47 +113,6 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
     );
   }
 
-  Widget _buildBottomNavBar() {
-    return BottomNavigationBar(
-      currentIndex: _currentIndex,
-      selectedItemColor: Colors.teal,
-      unselectedItemColor: const Color.fromARGB(255, 53, 44, 44),
-      backgroundColor: Colors.black.withValues(alpha: 0.4),
-      showUnselectedLabels: true,
-      type: BottomNavigationBarType.fixed,
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-        } else if (index == 1) {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => const DevicesTab()));
-        } else if (index == 2) {
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (_) => const AnalyticsScreen()));
-        } else if (index == 3) {
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (_) => const EnergySchedulingScreen()));
-        } else if (index == 4) {
-          setState(() {
-            _currentIndex = index;
-          });
-        } else if (index == 5) {
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (_) => const EnergyProfileScreen()));
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.flash_on), label: 'Energy'),
-        BottomNavigationBarItem(icon: Icon(Icons.devices), label: 'Devices'),
-        BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Analytics'),
-        BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -203,9 +163,10 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
                   color: Colors.white.withValues(alpha: 0.8),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2)),
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
                   ],
                 ),
                 child: Row(
@@ -296,7 +257,8 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
                         const CircleAvatar(
                           radius: 30,
                           backgroundColor: Colors.teal,
-                          child: Icon(Icons.person, size: 30, color: Colors.white),
+                          child:
+                              Icon(Icons.person, size: 30, color: Colors.white),
                         ),
                         const SizedBox(height: 12),
                         const Text(
@@ -309,27 +271,31 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
                         const SizedBox(height: 4),
                         const Text(
                           'marie@example.com',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                          style:
+                              TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                         const SizedBox(height: 12),
-                         InkWell(
+                        InkWell(
                           onTap: () {
                             _profileController.reverse();
-                            Future.delayed(const Duration(milliseconds: 300), () {
+                            Future.delayed(const Duration(milliseconds: 300),
+                                () {
                               if (!mounted) return;
                               Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) =>
-                                          const EnergyProfileScreen()));
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        const EnergyProfileScreen()),
+                              );
                             });
                           },
-                          child: const Text('View Profile',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold)),
+                          child: const Text(
+                            'View Profile',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      
                         const SizedBox(height: 8),
                         ElevatedButton(
                           onPressed: _profileController.reverse,
@@ -348,14 +314,28 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavBar(),
+      // ✅ Use CustomBottomNav instead of _buildBottomNavBar()
+      bottomNavigationBar: CustomBottomNav(
+        currentIndex: _currentIndex,
+        onTap: (index, page) {
+          setState(() {
+            _currentIndex = index;
+          });
+          if (index != 4) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => page),
+            );
+          }
+        },
+      ),
     );
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 80),
-      child: const Text(
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 80),
+      child: Text(
         'Settings',
         style: TextStyle(
           fontSize: 30,
@@ -384,13 +364,11 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
                 Text(
                   "Today's Energy Usage",
                   style: TextStyle(
@@ -539,8 +517,10 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Low', style: TextStyle(fontSize: 14, color: Colors.grey[500])),
-              Text('High', style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+              Text('Low',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+              Text('High',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500])),
             ],
           ),
         ),
@@ -636,7 +616,8 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Color(0xFF1e293b), width: 1)),
+          border:
+              Border(bottom: BorderSide(color: Color(0xFF1e293b), width: 1)),
         ),
         child: Row(
           children: [
@@ -654,7 +635,9 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
               child: Text(
                 title,
                 style: const TextStyle(
-                    fontSize: 18, color: Colors.white, fontWeight: FontWeight.w400),
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w400),
               ),
             ),
             if (trailing != null) trailing,
