@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'analytics.dart';
-import 'explore.dart';
-import 'schedule.dart';
-import 'settings.dart';
 import 'connected_devices.dart';
 import 'custom_bottom_nav.dart';
 import 'custom_header.dart';
@@ -22,7 +18,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late int _currentIndex;
   bool _isDarkMode = false;
-  bool _showGuidelines = false;
 
   late AnimationController _sidebarController;
   late AnimationController _overlayController;
@@ -67,34 +62,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   // Sidebar controls
-  void _openFeatures() {
-    _overlayController.forward();
-    _sidebarController.forward();
-  }
-
   void _closeFeatures() {
     _overlayController.reverse();
     _sidebarController.reverse();
   }
 
-  void _toggleFeatures() {
-    if (_sidebarController.isCompleted) {
-      _closeFeatures();
-    } else {
-      _openFeatures();
-    }
-  }
-
   // Profile dropdown controls
-  void _openProfile() => _profileController.forward();
+  
   void _closeProfile() => _profileController.reverse();
-  void _toggleProfile() {
-    if (_profileController.isCompleted) {
-      _closeProfile();
-    } else {
-      _openProfile();
-    }
-  }
+  
 
   // Navigate from features
   void selectFeature(String featureName, Widget screen) {
@@ -123,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
           Column(
             children: [
-              // ✅ Use CustomHeader instead of old SafeArea
+              // ✅ Use CustomHeader
               CustomHeader(
                 isDarkMode: _isDarkMode,
                 isSidebarOpen: _sidebarController.isCompleted,
@@ -132,8 +108,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     _isDarkMode = !_isDarkMode;
                   });
                 },
-                onToggleFeatures: _toggleFeatures,
-                onToggleProfile: _toggleProfile,
+               
               ),
 
               // Dashboard Content
@@ -175,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
 
-          // Sidebar slide-in
+          // Sidebar slide-in (empty now)
           SlideTransition(
             position: _slideAnimation,
             child: Align(
@@ -183,15 +158,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Container(
                 width: 250,
                 height: double.infinity,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 80),
-                        Expanded(child: ListView(children: _buildFeaturesList())),
-                      ],
+                color: const Color(0xFF1e293b),
+                child: const SafeArea(
+                  child: Center(
+                    child: Text(
+                      "Sidebar",
+                      style: TextStyle(color: Colors.white70),
                     ),
                   ),
                 ),
@@ -272,6 +244,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
+
   // ---------------------- Dashboard Cards & Sections ----------------------
   Widget _currentEnergyCard() {
     return Container(
@@ -338,239 +311,213 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   // ---------------------- Energy Consumption Chart ----------------------
- Widget _energyConsumptionChart() {
-  double screenWidth = MediaQuery.of(context).size.width;
+  Widget _energyConsumptionChart() {
+    double screenWidth = MediaQuery.of(context).size.width;
 
-  return Container(
-    width: double.infinity,
-    padding: EdgeInsets.all(screenWidth * 0.02), // smaller padding
-    decoration: BoxDecoration(
-      gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Title + Buttons
-        Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    Text(
-      'Energy Consumption',
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: screenWidth * 0.0110, // 🔽 smaller title text
-        color: Colors.white,
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(screenWidth * 0.02),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+        borderRadius: BorderRadius.circular(12),
       ),
-    ),
-    Row(
-      children: [
-        _timePeriodButton('Daily', EnergyPeriod.daily, screenWidth * 0.5),   // 🔽 smaller button
-        SizedBox(width: screenWidth * 0.02),
-        _timePeriodButton('Weekly', EnergyPeriod.weekly, screenWidth * 0.5), // 🔽 smaller button
-        SizedBox(width: screenWidth * 0.02),
-        _timePeriodButton('Monthly', EnergyPeriod.monthly, screenWidth * 0.5),
-      ],
-    )
-  ],
-),
-const SizedBox(height: 4), // 🔽 tighter spacing
-        // Smaller Graph
-        SizedBox(
-          height: screenWidth * 0.10, // smaller chart height
-          child: _buildEnergyChart(), // also make _buildEnergyChart small
-        ),
-        const SizedBox(height: 8),
-
-        // Peak & Lowest usage cards
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(screenWidth * 0.012),
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(25),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Peak Usage',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: screenWidth * 0.010, // smaller label
-                        )),
-                    const SizedBox(height: 2),
-                    Text('3.8 kWh at 3:15 PM',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: screenWidth * 0.010,// smaller value
-                        )),
-                  ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title + Buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Energy Consumption',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: screenWidth * 0.0110,
+                  color: Colors.white,
                 ),
               ),
-            ),
-            SizedBox(width: screenWidth * 0.012),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(screenWidth * 0.012),
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(25),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Lowest Usage',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: screenWidth * 0.010,
-                        )),
-                    const SizedBox(height: 2),
-                    Text('0.8 kWh at 4:00 AM',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: screenWidth * 0.010,
-                        )),
-                  ],
+              Row(
+                children: [
+                  _timePeriodButton('Daily', EnergyPeriod.daily, screenWidth * 0.5),
+                  SizedBox(width: screenWidth * 0.02),
+                  _timePeriodButton('Weekly', EnergyPeriod.weekly, screenWidth * 0.5),
+                  SizedBox(width: screenWidth * 0.02),
+                  _timePeriodButton('Monthly', EnergyPeriod.monthly, screenWidth * 0.5),
+                ],
+              )
+            ],
+          ),
+          const SizedBox(height: 4),
+          SizedBox(
+            height: screenWidth * 0.10,
+            child: _buildEnergyChart(),
+          ),
+          const SizedBox(height: 8),
+
+          // Peak & Lowest usage cards
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(screenWidth * 0.012),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(25),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Peak Usage',
+                          style: TextStyle(color: Colors.white70, fontSize: screenWidth * 0.010)),
+                      const SizedBox(height: 2),
+                      Text('3.8 kWh at 3:15 PM',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: screenWidth * 0.010)),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-
-
-Widget _buildEnergyChart() {
-  List<FlSpot> spots = [];
-  List<String> labels = [];
-
-  switch (_selectedPeriod) {
-    case EnergyPeriod.daily:
-      spots = List.generate(24, (h) => FlSpot((h + 1).toDouble(), 5 + (h % 6) * 3));
-      labels = List.generate(24, (h) => '${h + 1}'); // 1 to 24 hours
-      break;
-
-    case EnergyPeriod.weekly:
-      List<String> weekDays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-      spots = List.generate(7, (i) => FlSpot((i + 1).toDouble(), 10 + (i % 5) * 2));
-      labels = weekDays;
-      break;
-
-    case EnergyPeriod.monthly:
-      int daysInMonth = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
-      spots = List.generate(daysInMonth, (i) => FlSpot((i + 1).toDouble(), 8 + (i % 10)));
-      labels = List.generate(daysInMonth, (i) => '${i + 1}');
-      break;
+              SizedBox(width: screenWidth * 0.012),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(screenWidth * 0.012),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(25),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Lowest Usage',
+                          style: TextStyle(color: Colors.white70, fontSize: screenWidth * 0.010)),
+                      const SizedBox(height: 2),
+                      Text('0.8 kWh at 4:00 AM',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: screenWidth * 0.010)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
-  return LineChart(
-    LineChartData(
-      minX: 1,
-      maxX: spots.last.x,
-      minY: 0,
-      maxY: (spots.map((e) => e.y).reduce((a, b) => a > b ? a : b) * 1.2),
-      titlesData: FlTitlesData(
-        bottomTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            interval: _selectedPeriod == EnergyPeriod.daily ? 3 : 1,
-            getTitlesWidget: (value, _) {
-              int index = value.toInt() - 1; // subtract 1 to match labels
-              if (index >= 0 && index < labels.length) {
-                return Text(labels[index], style: const TextStyle(color: Colors.white70, fontSize: 10));
-              }
-              return const Text('');
+  Widget _buildEnergyChart() {
+    List<FlSpot> spots = [];
+    List<String> labels = [];
+
+    switch (_selectedPeriod) {
+      case EnergyPeriod.daily:
+        spots = List.generate(24, (h) => FlSpot((h + 1).toDouble(), 5 + (h % 6) * 3));
+        labels = List.generate(24, (h) => '${h + 1}');
+        break;
+
+      case EnergyPeriod.weekly:
+        List<String> weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        spots = List.generate(7, (i) => FlSpot((i + 1).toDouble(), 10 + (i % 5) * 2));
+        labels = weekDays;
+        break;
+
+      case EnergyPeriod.monthly:
+        int daysInMonth = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
+        spots = List.generate(daysInMonth, (i) => FlSpot((i + 1).toDouble(), 8 + (i % 10)));
+        labels = List.generate(daysInMonth, (i) => '${i + 1}');
+        break;
+    }
+
+    return LineChart(
+      LineChartData(
+        minX: 1,
+        maxX: spots.last.x,
+        minY: 0,
+        maxY: (spots.map((e) => e.y).reduce((a, b) => a > b ? a : b) * 1.2),
+        titlesData: FlTitlesData(
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: _selectedPeriod == EnergyPeriod.daily ? 3 : 1,
+              getTitlesWidget: (value, _) {
+                int index = value.toInt() - 1;
+                if (index >= 0 && index < labels.length) {
+                  return Text(labels[index], style: const TextStyle(color: Colors.white70, fontSize: 10));
+                }
+                return const Text('');
+              },
+            ),
+          ),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: 5,
+              getTitlesWidget: (value, _) => Text('${value.toInt()}', style: const TextStyle(color: Colors.white70, fontSize: 10)),
+            ),
+          ),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        gridData: FlGridData(
+          show: true,
+          drawHorizontalLine: true,
+          drawVerticalLine: true,
+          horizontalInterval: 5,
+          verticalInterval: _selectedPeriod == EnergyPeriod.daily ? 3 : 1,
+          getDrawingHorizontalLine: (value) => FlLine(color: Colors.white.withValues(alpha: 0.1), strokeWidth: 1),
+          getDrawingVerticalLine: (value) => FlLine(color: Colors.white.withValues(alpha: 0.1), strokeWidth: 1),
+        ),
+        borderData: FlBorderData(show: true, border: Border.all(color: Colors.white.withValues(alpha: 0.2))),
+        lineBarsData: [
+          LineChartBarData(
+            spots: spots,
+            isCurved: true,
+            color: Colors.teal,
+            barWidth: 3,
+            belowBarData: BarAreaData(show: true, color: Colors.teal.withValues(alpha: 0.2)),
+            dotData: FlDotData(show: true),
+          ),
+        ],
+        lineTouchData: LineTouchData(
+          handleBuiltInTouches: true,
+          touchTooltipData: LineTouchTooltipData(
+            tooltipBgColor: Colors.teal,
+            getTooltipItems: (touchedSpots) {
+              return touchedSpots.map((t) {
+                int index = t.x.toInt() - 1;
+                String label = labels[index];
+                return LineTooltipItem('$label\n${t.y.toStringAsFixed(1)} kWh',
+                    const TextStyle(color: Colors.white, fontSize: 12));
+              }).toList();
             },
           ),
         ),
-        leftTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            interval: 5,
-            getTitlesWidget: (value, _) => Text('${value.toInt()}', style: const TextStyle(color: Colors.white70, fontSize: 10)),
-          ),
-        ),
-        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
-      gridData: FlGridData(
-        show: true,
-        drawHorizontalLine: true,
-        drawVerticalLine: true,
-        horizontalInterval: 5,
-        verticalInterval: _selectedPeriod == EnergyPeriod.daily ? 3 : 1,
-        getDrawingHorizontalLine: (value) => FlLine(color: Colors.white.withValues(alpha: 0.1), strokeWidth: 1),
-        getDrawingVerticalLine: (value) => FlLine(color: Colors.white.withValues(alpha: 0.1), strokeWidth: 1),
-      ),
-      borderData: FlBorderData(show: true, border: Border.all(color: Colors.white.withValues(alpha: 0.2))),
-      lineBarsData: [
-        LineChartBarData(
-          spots: spots,
-          isCurved: true,
-          color: Colors.teal,
-          barWidth: 3,
-          belowBarData: BarAreaData(show: true, color: Colors.teal.withValues(alpha: 0.2)),
-          dotData: FlDotData(show: true),
-        ),
-      ],
-      lineTouchData: LineTouchData(
-        handleBuiltInTouches: true,
-        touchTooltipData: LineTouchTooltipData(
-          tooltipBgColor: Colors.teal,
-          getTooltipItems: (touchedSpots) {
-            return touchedSpots.map((t) {
-              int index = t.x.toInt() - 1; // match labels
-              String label = labels[index];
-              return LineTooltipItem('$label\n${t.y.toStringAsFixed(1)} kWh', const TextStyle(color: Colors.white, fontSize: 12));
-            }).toList();
-          },
-        ),
-      ),
-    ),
-  );
-}
-
+    );
+  }
 
   // ---------------------- Helper Widgets ----------------------
-Widget _timePeriodButton(String text, EnergyPeriod period, double screenWidth) {
-  return GestureDetector(
-    onTap: () {
-      setState(() {
-        _selectedPeriod = period;
-      });
-    },
-    child: Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.018, // tighter padding
-        vertical: screenWidth * 0.006,
-      ),
-      decoration: BoxDecoration(
-        color: _selectedPeriod == period
-            ? Colors.blue
-            : Colors.white.withAlpha(30),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: screenWidth * 0.022, // smaller button text
+  Widget _timePeriodButton(String text, EnergyPeriod period, double screenWidth) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedPeriod = period;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.018,
+          vertical: screenWidth * 0.006,
+        ),
+        decoration: BoxDecoration(
+          color: _selectedPeriod == period ? Colors.blue : Colors.white.withAlpha(30),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(color: Colors.white, fontSize: screenWidth * 0.022),
         ),
       ),
-    ),
-  );
-}
-
-
-
-
+    );
+  }
 
   Widget _connectedDevicesSection() {
     return Column(
@@ -583,162 +530,111 @@ Widget _timePeriodButton(String text, EnergyPeriod period, double screenWidth) {
     );
   }
 
-  Widget _deviceTile(IconData icon, String title, String status) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.tealAccent),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                Text(status, style: const TextStyle(fontSize: 12, color: Colors.white70)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _energyTipsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+ Widget _deviceTile(IconData icon, String title, String status) {
+  return Container(
+    padding: const EdgeInsets.all(12),
+    margin: const EdgeInsets.only(bottom: 8),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
       children: [
-        const Text('Energy Savings Tips', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        _tipTile(Icons.check_circle, 'Optimize AC Usage', 'Set to 24°C could save 15%'),
-        const SizedBox(height: 8),
-        _tipTile(Icons.schedule, 'Solar Power Hours', 'Use heavy appliances 10AM - 2PM'),
-      ],
-    );
-  }
-
-  Widget _tipTile(IconData icon, String title, String subtitle) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.tealAccent),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.white70)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _buildFeaturesList() {
-    final features = [
-      {"icon": Icons.devices, "title": "Devices", "screen": const DevicesTab()},
-      {"icon": Icons.show_chart, "title": "Analytics", "screen": const AnalyticsScreen()},
-      {"icon": Icons.schedule, "title": "Scheduling", "screen": const EnergySchedulingScreen()},
-      {"icon": Icons.settings, "title": "Settings", "screen": const EnergySettingScreen()},
-      {"icon": Icons.menu_book, "title": "Guidelines"}, // no screen, toggle dropdown
-    ];
-
-    return [
-      Padding(
-        padding: const EdgeInsets.all(12),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color.fromARGB(255, 31, 94, 196).withValues(alpha: 0.6),
-                Color.fromARGB(255, 41, 40, 75).withValues(alpha: 0.6),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 8, offset: Offset(0, 4))],
-          ),
+        Icon(icon, color: Colors.teal, size: 28),
+        const SizedBox(width: 12),
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Explore More",
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: features.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 1.0,
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
                 ),
-                itemBuilder: (context, index) {
-                  final feature = features[index];
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          if (feature["title"] == "Guidelines") {
-                            setState(() {
-                              _showGuidelines = !_showGuidelines;
-                            });
-                          } else {
-                            selectFeature(feature["title"] as String, feature["screen"] as Widget);
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(50),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(feature["icon"] as IconData, color: Colors.tealAccent, size: 24),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(feature["title"] as String,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                    ],
-                  );
-                },
               ),
-              if (_showGuidelines)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text("⚡ Save energy by turning off unused appliances.",
-                          style: TextStyle(color: Colors.white70, fontSize: 12)),
-                      Text("🌞 Use natural light during daytime.", style: TextStyle(color: Colors.white70, fontSize: 12)),
-                      Text("❄️ Optimize air conditioning usage.", style: TextStyle(color: Colors.white70, fontSize: 12)),
-                      Text("🔌 Unplug chargers when not in use.", style: TextStyle(color: Colors.white70, fontSize: 12)),
-                    ],
-                  ),
+              const SizedBox(height: 4),
+              Text(
+                status,
+                style: TextStyle(
+                  color: status == 'Active' ? Colors.greenAccent : Colors.redAccent,
+                  fontSize: 13,
                 ),
+              ),
             ],
           ),
         ),
+      ],
+    ),
+  );
+}
+
+
+Widget _tipTile(IconData icon, String title, String subtitle) {
+  return Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: const Color(0xFF1e293b),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      children: [
+        Icon(icon, color: Colors.tealAccent, size: 24),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+
+ Widget _energyTipsSection() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        'Smart Energy Tips',
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
-    ];
-  }
+      const SizedBox(height: 12),
+      _tipTile(Icons.battery_charging_full, 'Unplug Chargers',
+          'Unplug devices once fully charged to avoid phantom load.'),
+      const SizedBox(height: 8),
+      _tipTile(Icons.ac_unit, 'Efficient AC Use',
+          'Set air conditioners between 24–25°C for efficiency.'),
+      const SizedBox(height: 8),
+      _tipTile(Icons.lightbulb, 'Switch to LED',
+          'LED bulbs use up to 80% less energy than incandescent bulbs.'),
+      const SizedBox(height: 8),
+      _tipTile(Icons.local_laundry_service, 'Run Full Loads',
+          'Washers and dishwashers are most efficient when fully loaded.'),
+      const SizedBox(height: 8),
+      _tipTile(Icons.power, 'Use Smart Plugs',
+          'Monitor and control appliances remotely with smart plugs.'),
+    ],
+  );
+}
+
 }

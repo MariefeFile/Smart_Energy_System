@@ -5,6 +5,7 @@ import 'analytics.dart';
 import 'schedule.dart';
 import 'profile.dart';
 import 'custom_bottom_nav.dart';
+import 'custom_header.dart';
 
 class EnergySettingScreen extends StatefulWidget {
   const EnergySettingScreen({super.key});
@@ -57,13 +58,7 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
     super.dispose();
   }
 
-  void _toggleProfile() {
-    if (_profileController.isCompleted) {
-      _profileController.reverse();
-    } else {
-      _profileController.forward();
-    }
-  }
+  
 
   String get powerSavingText {
     if (powerSavingLevel < 0.33) return 'Low';
@@ -135,83 +130,33 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildHeader(),
-                      const SizedBox(height: 30),
-                      _buildEnergyUsage(),
-                      const SizedBox(height: 40),
-                      _buildEnergyManagement(),
-                      const SizedBox(height: 40),
-                      _buildDeviceManagement(),
-                      const SizedBox(height: 40),
-                      _buildPreferences(),
-                      const SizedBox(height: 100),
-                    ],
+  _buildHeader(),
+  const SizedBox(height: 12), // ⬅️ reduced from 30 → 12
+  _buildEnergyUsage(),
+  const SizedBox(height: 30), // keep others as they are
+  _buildEnergyManagement(),
+  const SizedBox(height: 40),
+  _buildDeviceManagement(),
+  const SizedBox(height: 40),
+  _buildPreferences(),
+  const SizedBox(height: 100),
+],
+
                   ),
                 ),
               ),
             ),
           ),
           // Top AppBar
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              child: Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 16),
-                    const Icon(Icons.add, color: Colors.teal),
-                    const SizedBox(width: 16),
-                    const Expanded(
-                      child: Text(
-                        'Smart Energy System',
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.notifications, color: Colors.teal),
-                      onPressed: () {},
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                        color: Colors.teal,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isDarkMode = !_isDarkMode;
-                        });
-                      },
-                    ),
-                    GestureDetector(
-                      onTap: _toggleProfile,
-                      child: const CircleAvatar(
-                        backgroundColor: Colors.teal,
-                        child: Icon(Icons.person, color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-                ),
-              ),
-            ),
-          ),
+         CustomHeader(
+      isDarkMode: _isDarkMode,
+      isSidebarOpen: false, // settings screen has no sidebar
+      onToggleDarkMode: () {
+        setState(() {
+          _isDarkMode = !_isDarkMode;
+        });
+      },
+    ),
           // Profile Popover
           Positioned(
             top: 70,
@@ -332,19 +277,20 @@ class _EnergySettingScreenState extends State<EnergySettingScreen>
     );
   }
 
-  Widget _buildHeader() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 80),
-      child: Text(
-        'Settings',
-        style: TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.w300,
-          color: Colors.white,
-        ),
+ Widget _buildHeader() {
+  return const Padding(
+    padding: EdgeInsets.only(top: 80, bottom: 12), // ⬅️ smaller bottom padding
+    child: Text(
+      'Settings',
+      style: TextStyle(
+        fontSize: 30,
+        fontWeight: FontWeight.w300,
+        color: Colors.white,
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildEnergyUsage() {
     return Container(

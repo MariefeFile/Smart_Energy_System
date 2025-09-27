@@ -3,6 +3,7 @@ import 'package:smartenergy_app/screen/profile.dart';
 import 'chatbot.dart';
 import 'connected_devices.dart';
 import 'custom_bottom_nav.dart';
+import 'custom_header.dart';
 
 class DevicesTab extends StatefulWidget {
   const DevicesTab({super.key});
@@ -59,13 +60,7 @@ class _DevicesTabState extends State<DevicesTab> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _toggleProfile() {
-    if (_profileController.status == AnimationStatus.dismissed) {
-      _profileController.forward();
-    } else {
-      _profileController.reverse();
-    }
-  }
+  
 
   void _filterDevices(String query) {
     final results = connectedDevices.where((device) {
@@ -189,6 +184,7 @@ class _DevicesTabState extends State<DevicesTab> with TickerProviderStateMixin {
     return Scaffold(
       body: Stack(
         children: [
+          // background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -201,54 +197,18 @@ class _DevicesTabState extends State<DevicesTab> with TickerProviderStateMixin {
           SafeArea(
             child: Column(
               children: [
-                // AppBar
-                Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha((255 * 0.8).toInt()),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha((255 * 0.1).toInt()),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 16),
-                      const Icon(Icons.add, color: Colors.teal),
-                      const SizedBox(width: 16),
-                      const Expanded(
-                        child: Text(
-                          'Smart Energy System',
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.notifications, color: Colors.teal),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode, color: Colors.teal),
-                        onPressed: () => setState(() => _isDarkMode = !_isDarkMode),
-                      ),
-                      GestureDetector(
-                        onTap: _toggleProfile,
-                        child: const CircleAvatar(
-                          backgroundColor: Colors.teal,
-                          child: Icon(Icons.person, color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                    ],
-                  ),
+                // ✅ Reusable Header
+                CustomHeader(
+                  isDarkMode: _isDarkMode,
+                  isSidebarOpen: false,
+                  onToggleDarkMode: () {
+                    setState(() => _isDarkMode = !_isDarkMode);
+                  },
+                 
                 ),
+
                 const SizedBox(height: 16),
+
                 // Main Body
                 Expanded(
                   child: FadeTransition(
@@ -301,80 +261,82 @@ class _DevicesTabState extends State<DevicesTab> with TickerProviderStateMixin {
                           ],
                         ),
                         const SizedBox(height: 16),
-                       Card(
-  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-  elevation: 10,
-  shadowColor: Colors.orangeAccent.withAlpha((0.4 * 255).toInt()), // replaced with .withAlpha()
-  child: Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Color(0xFF1A1F36), Color(0xFF111629)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      borderRadius: BorderRadius.circular(24),
-    ),
-    padding: EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-  Icons.power,
-  color: _breakerStatus
-      ? const Color.fromARGB(255, 25, 207, 98) // green when ON
-      : Colors.grey.shade400,                  // gray when OFF
-  size: 36,
-),
-        Text(
-          'Breaker',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        SizedBox(height: 16),
-        GestureDetector(
-  onTap: () {
-    setState(() {
-      _breakerStatus = !_breakerStatus; // toggles ON/OFF
-    });
-  },
-  child: AnimatedContainer(
-    duration: const Duration(milliseconds: 300),
-    width: 70,
-    height: 70,
-    decoration: BoxDecoration(
-      color: _breakerStatus
-          ? const Color.fromARGB(255, 110, 219, 168) // your button green
-          : Colors.grey[800],                         // button gray
-      shape: BoxShape.circle,
-      boxShadow: [
-        BoxShadow(
-          color: _breakerStatus
-              ? const Color.fromARGB(255, 60, 197, 108).withAlpha(150)
-              : Colors.black26,
-          blurRadius: 12,
-          spreadRadius: 2,
-        ),
-      ],
-    ),
-    alignment: Alignment.center,
-    child: Text(
-      _breakerStatus ? 'ON' : 'OFF',
-      style: const TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-  ),
-),
 
-      ],
-    ),
-  ),
-),
-                        // Connected Devices Header + Add Button
+                        // Breaker Card
+                        Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                          elevation: 10,
+                          shadowColor: Colors.orangeAccent.withAlpha((0.4 * 255).toInt()),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF1A1F36), Color(0xFF111629)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.power,
+                                  color: _breakerStatus
+                                      ? const Color.fromARGB(255, 25, 207, 98)
+                                      : Colors.grey.shade400,
+                                  size: 36,
+                                ),
+                                const Text(
+                                  'Breaker',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _breakerStatus = !_breakerStatus;
+                                    });
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    width: 70,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      color: _breakerStatus
+                                          ? const Color.fromARGB(255, 110, 219, 168)
+                                          : Colors.grey[800],
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: _breakerStatus
+                                              ? const Color.fromARGB(255, 60, 197, 108).withAlpha(150)
+                                              : Colors.black26,
+                                          blurRadius: 12,
+                                          spreadRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      _breakerStatus ? 'ON' : 'OFF',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Connected Devices Header
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -386,14 +348,15 @@ class _DevicesTabState extends State<DevicesTab> with TickerProviderStateMixin {
                               backgroundColor: Colors.transparent,
                               elevation: 0,
                               onPressed: () => _showDeviceDialog(),
-                              label: const Text("Add Device", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                              label: const Text("Add Device",
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                               icon: const Icon(Icons.add, color: Colors.white, size: 16),
                               extendedPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        
+
                         // Device Cards
                         ...filteredDevices.asMap().entries.map((entry) {
                           int index = entry.key;
@@ -458,7 +421,9 @@ class _DevicesTabState extends State<DevicesTab> with TickerProviderStateMixin {
                                                 style: TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.bold,
-                                                  color: device.status.toLowerCase() == 'on' ? Colors.transparent : Colors.white,
+                                                  color: device.status.toLowerCase() == 'on'
+                                                      ? Colors.transparent
+                                                      : Colors.white,
                                                 ),
                                               ),
                                             ),
@@ -518,6 +483,7 @@ class _DevicesTabState extends State<DevicesTab> with TickerProviderStateMixin {
               ],
             ),
           ),
+
           // Profile Popover
           Positioned(
             top: 70,
@@ -539,34 +505,49 @@ class _DevicesTabState extends State<DevicesTab> with TickerProviderStateMixin {
                         colors: [Color(0xFF1e293b), Color(0xFF0f172a)],
                       ),
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: [BoxShadow(color: Colors.black.withAlpha(150), blurRadius: 10, offset: const Offset(2, 2))],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(150),
+                          blurRadius: 10,
+                          offset: const Offset(2, 2),
+                        )
+                      ],
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Profile', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
+                        const Text('Profile',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
                         const SizedBox(height: 12),
-                        const CircleAvatar(radius: 30, backgroundColor: Colors.teal, child: Icon(Icons.person, size: 30, color: Colors.white)),
+                        const CircleAvatar(
+                            radius: 30,
+                            backgroundColor: Colors.teal,
+                            child: Icon(Icons.person, size: 30, color: Colors.white)),
                         const SizedBox(height: 12),
-                        const Text('Marie Fe Tapales', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        const Text('Marie Fe Tapales',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        const Text('mariefe@example.com', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                        const Text('mariefe@example.com',
+                            style: TextStyle(color: Colors.white70, fontSize: 12)),
                         const SizedBox(height: 12),
                         InkWell(
                           onTap: () {
                             _profileController.reverse();
                             Future.delayed(const Duration(milliseconds: 300), () {
                               if (!mounted) return;
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const EnergyProfileScreen()));
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder: (_) => const EnergyProfileScreen()));
                             });
                           },
-                          child: const Text('View Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          child: const Text('View Profile',
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         ),
                         const SizedBox(height: 8),
                         ElevatedButton(
                           onPressed: _profileController.reverse,
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, minimumSize: const Size.fromHeight(36)),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal, minimumSize: const Size.fromHeight(36)),
                           child: const Text('Close'),
                         ),
                       ],
@@ -579,16 +560,15 @@ class _DevicesTabState extends State<DevicesTab> with TickerProviderStateMixin {
         ],
       ),
       bottomNavigationBar: CustomBottomNav(
-  currentIndex: 1, // since this is Devices
-  onTap: (index, page) {
-    if (index == 1) return; // already on Devices
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => page),
-    );
-  },
-),
-
+        currentIndex: 1, // since this is Devices
+        onTap: (index, page) {
+          if (index == 1) return; // already on Devices
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => page),
+          );
+        },
+      ),
     );
   }
 }

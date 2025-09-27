@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:smartenergy_app/screen/profile.dart';
 import 'connected_devices.dart';
 import 'custom_bottom_nav.dart';
+import 'custom_header.dart';
 
 enum EnergyRange { daily, weekly, monthly }
 
@@ -80,13 +81,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     super.dispose();
   }
 
-  void _toggleProfile() {
-    if (_profileController.status == AnimationStatus.dismissed) {
-      _profileController.forward();
-    } else {
-      _profileController.reverse();
-    }
-  }
+  
 
   Widget _headerWidget() {
     switch (_selectedRange) {
@@ -240,54 +235,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           ),
           Column(
             children: [
-              SafeArea(
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 16),
-                      const Icon(Icons.add, color: Colors.teal),
-                      const SizedBox(width: 16),
-                      const Expanded(
-                        child: Text(
-                          'Smart Energy System',
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.notifications, color: Colors.teal),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode, color: Colors.teal),
-                        onPressed: () => setState(() => _isDarkMode = !_isDarkMode),
-                      ),
-                      GestureDetector(
-                        onTap: _toggleProfile,
-                        child: const CircleAvatar(
-                          backgroundColor: Colors.teal,
-                          child: Icon(Icons.person, color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                    ],
-                  ),
-                ),
-              ),
+             CustomHeader(
+  isDarkMode: _isDarkMode,
+  isSidebarOpen: false, // you can adjust if you add sidebar
+  onToggleDarkMode: () {
+    setState(() => _isDarkMode = !_isDarkMode);
+  },
+),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16),

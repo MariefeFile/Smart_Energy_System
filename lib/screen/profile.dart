@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart'; // ✅ Import Google Sign-In
-import 'login.dart'; // ✅ Import your actual login page (replace AuthPage)
-
-import 'custom_bottom_nav.dart'; // ✅ Import your custom nav
+import 'package:google_sign_in/google_sign_in.dart'; // ✅ Google Sign-In
+import 'login.dart'; // ✅ Replace with your actual login page
+import 'custom_bottom_nav.dart'; // ✅ Custom bottom nav
+import 'custom_header.dart'; // ✅ Import custom header
 
 class EnergyProfileScreen extends StatefulWidget {
   const EnergyProfileScreen({super.key});
@@ -16,6 +16,7 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
   int _currentIndex = 5; // Profile tab
   late AnimationController _animationController;
   bool _isDarkMode = false;
+  bool _isSidebarOpen = false; // For header toggle
 
   @override
   void initState() {
@@ -54,17 +55,23 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1a2332),
-                  Color(0xFF0f1419),
-                ],
+                colors: [Color(0xFF1a2332), Color(0xFF0f1419)],
               ),
             ),
           ),
           SafeArea(
             child: Column(
               children: [
-                _buildAppBar(),
+                // ✅ Use CustomHeader here
+                CustomHeader(
+                  isDarkMode: _isDarkMode,
+                  isSidebarOpen: _isSidebarOpen,
+                  onToggleDarkMode: () {
+                    setState(() {
+                      _isDarkMode = !_isDarkMode;
+                    });
+                  },
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -87,42 +94,6 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
       ),
-    );
-  }
-
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: _isDarkMode
-          ? Colors.grey[850]?.withValues(alpha: 0.8)
-          : Colors.white.withValues(alpha: 0.8),
-      elevation: 0,
-      title: const Text(
-        'Smart Energy System',
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      leading: const Icon(Icons.add, color: Colors.teal),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications, color: Colors.teal),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: Icon(
-            _isDarkMode ? Icons.dark_mode : Icons.light_mode,
-            color: Colors.teal,
-          ),
-          onPressed: () {
-            setState(() {
-              _isDarkMode = !_isDarkMode;
-            });
-          },
-        ),
-        const CircleAvatar(
-          backgroundColor: Colors.teal,
-          child: Icon(Icons.person, color: Colors.white),
-        ),
-        const SizedBox(width: 12),
-      ],
     );
   }
 
@@ -159,7 +130,7 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
                   ),
                   child: ClipOval(
                     child: Image.asset(
-                      'assets/images/profile_avatar.jpg', // Add your image asset
+                      'assets/images/profile_avatar.jpg', // ✅ Add your image
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return const CircleAvatar(
@@ -286,18 +257,12 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[400],
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey[400]),
         ),
         Text(
           value,
           style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+              fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ],
     );
@@ -344,10 +309,7 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
                   onPressed: () {},
                   child: Text(
                     'Help & Support',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[400],
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey[400]),
                   ),
                 ),
                 ElevatedButton(
@@ -357,8 +319,8 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6B6B),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 25, vertical: 12),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -405,8 +367,10 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
   Widget _buildDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
-      child:
-          Divider(color: Colors.white.withAlpha((0.2 * 255).toInt()), height: 1),
+      child: Divider(
+        color: Colors.white.withAlpha((0.2 * 255).toInt()),
+        height: 1,
+      ),
     );
   }
 
@@ -430,27 +394,21 @@ class _EnergyProfileScreenState extends State<EnergyProfileScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.grey[400]),
-              ),
+              child: Text('Cancel', style: TextStyle(color: Colors.grey[400])),
             ),
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop(); // Close dialog first
-
                 try {
                   final googleSignIn = GoogleSignIn();
                   await googleSignIn.signOut();
                 } catch (e) {
                   debugPrint("Google sign out error: $e");
                 }
-
                 if (!mounted) return;
-
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => const AuthPage()), // ✅ FIXED
+                  MaterialPageRoute(builder: (_) => const AuthPage()),
                   (route) => false,
                 );
               },

@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
+import 'profile.dart'; // ✅ make sure this path is correct
 
 class CustomHeader extends StatelessWidget {
   final bool isDarkMode;
-  final bool isSidebarOpen; 
+  final bool isSidebarOpen;
   final VoidCallback onToggleDarkMode;
-  final VoidCallback onToggleFeatures;
-  final VoidCallback onToggleProfile;
 
   const CustomHeader({
     super.key,
     required this.isDarkMode,
-     required this.isSidebarOpen, 
+    required this.isSidebarOpen,
     required this.onToggleDarkMode,
-    required this.onToggleFeatures,
-    required this.onToggleProfile,
-     
   });
 
   @override
@@ -47,7 +43,9 @@ class CustomHeader extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.notifications, color: Colors.teal),
-              onPressed: () {},
+              onPressed: () {
+                // Optional: Add notifications page navigation here
+              },
             ),
             IconButton(
               icon: Icon(
@@ -57,45 +55,13 @@ class CustomHeader extends StatelessWidget {
               onPressed: onToggleDarkMode,
             ),
             GestureDetector(
-              onTap: onToggleFeatures,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha((0.2 * 255).round()),
-                      blurRadius: 4,
-                      offset: const Offset(2, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(3, (i) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: List.generate(3, (j) {
-                        return Container(
-                          margin: const EdgeInsets.all(1.5),
-                          width: 3,
-                          height: 3,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                        );
-                      }),
-                    );
-                  }),
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: onToggleProfile,
+              onTap: () {
+                // ✅ Navigate to profile.dart directly
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const EnergyProfileScreen()),
+                );
+              },
               child: const CircleAvatar(
                 backgroundColor: Colors.teal,
                 child: Icon(Icons.person, color: Colors.white),
