@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'connected_devices.dart';
 import 'custom_bottom_nav.dart';
 import 'custom_header.dart';
+import 'energy_chart.dart';
 
 enum EnergyPeriod { daily, weekly, monthly }
-EnergyPeriod _selectedPeriod = EnergyPeriod.daily;
+
 
 class HomeScreen extends StatefulWidget {
   final int initialIndex;
@@ -310,215 +310,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ---------------------- Energy Consumption Chart ----------------------
-  Widget _energyConsumptionChart() {
-    double screenWidth = MediaQuery.of(context).size.width;
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(screenWidth * 0.02),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title + Buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Energy Consumption',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: screenWidth * 0.0110,
-                  color: Colors.white,
-                ),
-              ),
-              Row(
-                children: [
-                  _timePeriodButton('Daily', EnergyPeriod.daily, screenWidth * 0.5),
-                  SizedBox(width: screenWidth * 0.02),
-                  _timePeriodButton('Weekly', EnergyPeriod.weekly, screenWidth * 0.5),
-                  SizedBox(width: screenWidth * 0.02),
-                  _timePeriodButton('Monthly', EnergyPeriod.monthly, screenWidth * 0.5),
-                ],
-              )
-            ],
-          ),
-          const SizedBox(height: 4),
-          SizedBox(
-            height: screenWidth * 0.10,
-            child: _buildEnergyChart(),
-          ),
-          const SizedBox(height: 8),
-
-          // Peak & Lowest usage cards
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.all(screenWidth * 0.012),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(25),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Peak Usage',
-                          style: TextStyle(color: Colors.white70, fontSize: screenWidth * 0.010)),
-                      const SizedBox(height: 2),
-                      Text('3.8 kWh at 3:15 PM',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: screenWidth * 0.010)),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(width: screenWidth * 0.012),
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.all(screenWidth * 0.012),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(25),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Lowest Usage',
-                          style: TextStyle(color: Colors.white70, fontSize: screenWidth * 0.010)),
-                      const SizedBox(height: 2),
-                      Text('0.8 kWh at 4:00 AM',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: screenWidth * 0.010)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEnergyChart() {
-    List<FlSpot> spots = [];
-    List<String> labels = [];
-
-    switch (_selectedPeriod) {
-      case EnergyPeriod.daily:
-        spots = List.generate(24, (h) => FlSpot((h + 1).toDouble(), 5 + (h % 6) * 3));
-        labels = List.generate(24, (h) => '${h + 1}');
-        break;
-
-      case EnergyPeriod.weekly:
-        List<String> weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        spots = List.generate(7, (i) => FlSpot((i + 1).toDouble(), 10 + (i % 5) * 2));
-        labels = weekDays;
-        break;
-
-      case EnergyPeriod.monthly:
-        int daysInMonth = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
-        spots = List.generate(daysInMonth, (i) => FlSpot((i + 1).toDouble(), 8 + (i % 10)));
-        labels = List.generate(daysInMonth, (i) => '${i + 1}');
-        break;
-    }
-
-    return LineChart(
-      LineChartData(
-        minX: 1,
-        maxX: spots.last.x,
-        minY: 0,
-        maxY: (spots.map((e) => e.y).reduce((a, b) => a > b ? a : b) * 1.2),
-        titlesData: FlTitlesData(
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              interval: _selectedPeriod == EnergyPeriod.daily ? 3 : 1,
-              getTitlesWidget: (value, _) {
-                int index = value.toInt() - 1;
-                if (index >= 0 && index < labels.length) {
-                  return Text(labels[index], style: const TextStyle(color: Colors.white70, fontSize: 10));
-                }
-                return const Text('');
-              },
-            ),
-          ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              interval: 5,
-              getTitlesWidget: (value, _) => Text('${value.toInt()}', style: const TextStyle(color: Colors.white70, fontSize: 10)),
-            ),
-          ),
-          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        ),
-        gridData: FlGridData(
-          show: true,
-          drawHorizontalLine: true,
-          drawVerticalLine: true,
-          horizontalInterval: 5,
-          verticalInterval: _selectedPeriod == EnergyPeriod.daily ? 3 : 1,
-          getDrawingHorizontalLine: (value) => FlLine(color: Colors.white.withValues(alpha: 0.1), strokeWidth: 1),
-          getDrawingVerticalLine: (value) => FlLine(color: Colors.white.withValues(alpha: 0.1), strokeWidth: 1),
-        ),
-        borderData: FlBorderData(show: true, border: Border.all(color: Colors.white.withValues(alpha: 0.2))),
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: true,
-            color: Colors.teal,
-            barWidth: 3,
-            belowBarData: BarAreaData(show: true, color: Colors.teal.withValues(alpha: 0.2)),
-            dotData: FlDotData(show: true),
-          ),
-        ],
-        lineTouchData: LineTouchData(
-          handleBuiltInTouches: true,
-          touchTooltipData: LineTouchTooltipData(
-            tooltipBgColor: Colors.teal,
-            getTooltipItems: (touchedSpots) {
-              return touchedSpots.map((t) {
-                int index = t.x.toInt() - 1;
-                String label = labels[index];
-                return LineTooltipItem('$label\n${t.y.toStringAsFixed(1)} kWh',
-                    const TextStyle(color: Colors.white, fontSize: 12));
-              }).toList();
-            },
+ 
+ // ---------------------- Energy Consumption Chart ----------------------
+Widget _energyConsumptionChart() {
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start, // ✅ align left
+      children: const [
+        Text(
+          "Energy Consumption",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
         ),
-      ),
-    );
-  }
+        SizedBox(height: 12), // spacing before chart
+        EnergyConsumptionChart(),
+      ],
+    ),
+  );
+}
 
+  
   // ---------------------- Helper Widgets ----------------------
-  Widget _timePeriodButton(String text, EnergyPeriod period, double screenWidth) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedPeriod = period;
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: screenWidth * 0.018,
-          vertical: screenWidth * 0.006,
-        ),
-        decoration: BoxDecoration(
-          color: _selectedPeriod == period ? Colors.blue : Colors.white.withAlpha(30),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(color: Colors.white, fontSize: screenWidth * 0.022),
-        ),
-      ),
-    );
-  }
-
+ 
   Widget _connectedDevicesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

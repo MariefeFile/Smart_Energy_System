@@ -5,6 +5,7 @@ import 'connected_devices.dart';
 import 'custom_bottom_nav.dart';
 import 'custom_header.dart';
 
+
 enum EnergyRange { daily, weekly, monthly }
 
 class AnalyticsScreen extends StatefulWidget {
