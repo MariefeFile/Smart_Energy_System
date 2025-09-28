@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:smartenergy_app/screen/profile.dart';
 import 'connected_devices.dart';
 import 'custom_bottom_nav.dart';
 import 'custom_header.dart';
-
+import 'profile.dart';
 
 enum EnergyRange { daily, weekly, monthly }
 
@@ -32,29 +31,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
 
   static const List<String> _monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  static const List<String> _weekDays = [
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-    'Sun'
-  ];
+  static const List<String> _weekDays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   @override
   void initState() {
@@ -66,14 +47,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     _profileSlideAnimation = Tween<Offset>(
       begin: const Offset(0.2, -0.2),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _profileController, curve: Curves.easeOutBack),
-    );
+    ).animate(CurvedAnimation(parent: _profileController, curve: Curves.easeOutBack));
+
     _profileScaleAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _profileController, curve: Curves.easeOutBack),
     );
-    _profileFadeAnimation =
-        CurvedAnimation(parent: _profileController, curve: Curves.easeInOut);
+    _profileFadeAnimation = CurvedAnimation(parent: _profileController, curve: Curves.easeInOut);
   }
 
   @override
@@ -82,111 +61,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     super.dispose();
   }
 
-  
-
-  Widget _headerWidget() {
-    switch (_selectedRange) {
-      case EnergyRange.daily:
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '${_monthNames[_selectedDate.month - 1]} ${_selectedDate.day}, ${_selectedDate.year}',
-              style: const TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.calendar_today, color: Colors.white, size: 20),
-              onPressed: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _selectedDate,
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2100),
-                );
-                if (picked != null) {
-                  setState(() => _selectedDate = picked);
-                }
-              },
-            )
-          ],
-        );
-
-      case EnergyRange.weekly:
-        final end = _selectedWeekStart.add(const Duration(days: 6));
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '${_monthNames[_selectedWeekStart.month - 1]} ${_selectedWeekStart.day}'
-              ' – ${_monthNames[end.month - 1]} ${end.day}, ${end.year}',
-              style: const TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.calendar_month, color: Colors.white, size: 20),
-              onPressed: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _selectedWeekStart,
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2100),
-                );
-                if (picked != null) {
-                  final monday = picked.subtract(Duration(days: picked.weekday - 1));
-                  setState(() => _selectedWeekStart = monday);
-                }
-              },
-            )
-          ],
-        );
-
-      case EnergyRange.monthly:
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '${_monthNames[_selectedMonth - 1]}, ${DateTime.now().year}',
-              style: const TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.calendar_view_month, color: Colors.white, size: 20),
-              onPressed: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime(DateTime.now().year, _selectedMonth, 1),
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2100),
-                );
-                if (picked != null) {
-                  setState(() => _selectedMonth = picked.month);
-                }
-              },
-            )
-          ],
-        );
-    }
-  }
-
-  List<FlSpot> _getUsageData() {
-    switch (_selectedRange) {
-      case EnergyRange.daily:
-        return List.generate(24, (h) => FlSpot(h.toDouble(), 10 + (h % 6) * 3));
-      case EnergyRange.weekly:
-        return List.generate(7, (d) => FlSpot(d.toDouble(), 20 + (d % 3) * 5));
-      case EnergyRange.monthly:
-        final daysInMonth = DateTime(DateTime.now().year, _selectedMonth + 1, 0).day;
-        return List.generate(daysInMonth, (i) => FlSpot((i + 1).toDouble(), 30 + (i % 5) * 4));
-    }
-  }
-
   Widget _rangeSelector() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         _rangeButton(EnergyRange.daily, 'Daily'),
         const SizedBox(width: 8),
@@ -218,6 +95,100 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     );
   }
 
+  Widget _headerWidget() {
+    switch (_selectedRange) {
+      case EnergyRange.daily:
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              '${_monthNames[_selectedDate.month - 1]} ${_selectedDate.day}, ${_selectedDate.year}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.calendar_today, color: Colors.white, size: 20),
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2100),
+                );
+                if (picked != null && mounted) {
+                  setState(() => _selectedDate = picked);
+                }
+              },
+            )
+          ],
+        );
+      case EnergyRange.weekly:
+        final end = _selectedWeekStart.add(const Duration(days: 6));
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              '${_monthNames[_selectedWeekStart.month - 1]} ${_selectedWeekStart.day} – ${_monthNames[end.month - 1]} ${end.day}, ${end.year}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.calendar_month, color: Colors.white, size: 20),
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedWeekStart,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2100),
+                );
+                if (picked != null && mounted) {
+                  final monday = picked.subtract(Duration(days: picked.weekday - 1));
+                  setState(() => _selectedWeekStart = monday);
+                }
+              },
+            )
+          ],
+        );
+      case EnergyRange.monthly:
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              '${_monthNames[_selectedMonth - 1]}, ${DateTime.now().year}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.calendar_view_month, color: Colors.white, size: 20),
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime(DateTime.now().year, _selectedMonth, 1),
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2100),
+                );
+                if (picked != null && mounted) {
+                  setState(() => _selectedMonth = picked.month);
+                }
+              },
+            )
+          ],
+        );
+    }
+  }
+
+  List<FlSpot> _getUsageData() {
+    switch (_selectedRange) {
+      case EnergyRange.daily:
+        return List.generate(24, (h) => FlSpot(h.toDouble(), 10 + (h % 6) * 3));
+      case EnergyRange.weekly:
+        return List.generate(7, (d) => FlSpot(d.toDouble(), 20 + (d % 3) * 5));
+      case EnergyRange.monthly:
+        final daysInMonth = DateTime(DateTime.now().year, _selectedMonth + 1, 0).day;
+        return List.generate(daysInMonth, (i) => FlSpot((i + 1).toDouble(), 30 + (i % 5) * 4));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double totalUsage = connectedDevices.fold(0, (sum, d) => sum + d.usage);
@@ -236,13 +207,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           ),
           Column(
             children: [
-             CustomHeader(
-  isDarkMode: _isDarkMode,
-  isSidebarOpen: false, // you can adjust if you add sidebar
-  onToggleDarkMode: () {
-    setState(() => _isDarkMode = !_isDarkMode);
-  },
-),
+              CustomHeader(
+                isDarkMode: _isDarkMode,
+                isSidebarOpen: false,
+                onToggleDarkMode: () {
+                  setState(() => _isDarkMode = !_isDarkMode);
+                },
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
@@ -250,97 +221,51 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 20),
-                      const Text(
-                        'Analytics',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      const Text('Analytics', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Expanded(
-                            child: summaryCard(
-                              'Total Consumption',
-                              '${totalUsage.toStringAsFixed(1)} kWh',
-                              '+4.2%',
-                            ),
-                          ),
+                          Expanded(child: summaryCard('Total Consumption', '${totalUsage.toStringAsFixed(1)} kWh', '+4.2%')),
                           const SizedBox(width: 12),
-                          Expanded(
-                            child: summaryCard(
-                              'Cost',
-                              '₱${(totalUsage * 0.188).toStringAsFixed(2)}',
-                              '+16.5%',
-                            ),
-                          ),
+                          Expanded(child: summaryCard('Cost', '₱${(totalUsage * 0.188).toStringAsFixed(2)}', '+16.5%')),
                         ],
                       ),
                       const SizedBox(height: 24),
-                      const Text(
-                        'Energy Usage',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      const Text('Energy Usage', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                       const SizedBox(height: 8),
                       _rangeSelector(),
                       const SizedBox(height: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: _headerWidget(),
-                          ),
-                          SizedBox(height: 200, child: lineChart()),
-                        ],
-                      ),
+                      _headerWidget(),
+                      const SizedBox(height: 12),
+                      SizedBox(height: 200, child: lineChart()),
                       const SizedBox(height: 24),
-                      if (_selectedDateFromChart != null) ...[
-                        Text(
-                          'Devices on ${_monthNames[_selectedDateFromChart!.month - 1]} '
-                          '${_selectedDateFromChart!.day}, ${_selectedDateFromChart!.year}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
+                      if (_selectedDateFromChart != null)
                         Column(
-                          children: connectedDevices.map((device) {
-                            double adjustedUsage = device.usage;
-                            if (_selectedRange == EnergyRange.weekly) {
-                              int dayIndex = _selectedDateFromChart!.difference(_selectedWeekStart).inDays;
-                              adjustedUsage *= (0.6 + (dayIndex * 0.1));
-                            } else if (_selectedRange == EnergyRange.monthly) {
-                              int dayIndex = _selectedDateFromChart!.day - 1;
-                              adjustedUsage *= (0.5 + (dayIndex * 0.05));
-                            } else if (_selectedRange == EnergyRange.daily) {
-                              int hour = _selectedDateFromChart!.hour;
-                              adjustedUsage *= (0.5 + (hour * 0.05));
-                            }
-                            double totalForSelected = connectedDevices.fold(0, (sum, d) => sum + d.usage);
-                            double percent = totalForSelected == 0 ? 0 : adjustedUsage / totalForSelected;
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Devices on ${_monthNames[_selectedDateFromChart!.month - 1]} ${_selectedDateFromChart!.day}, ${_selectedDateFromChart!.year}',
+                              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
+                            ),
+                            const SizedBox(height: 16),
+                            Column(
+                              children: connectedDevices.map((device) {
+                                double adjustedUsage = device.usage;
+                                bool isOnline = true;
+                                String status = "Good";
 
-                            return breakdownTile(
-                              device.icon,
-                              device.name,
-                              '${adjustedUsage.toStringAsFixed(1)} kWh',
-                              percent,
-                            );
-                          }).toList(),
+                                return breakdownTile(device.icon, device.name, '${adjustedUsage.toStringAsFixed(1)} kWh', adjustedUsage / totalUsage, isOnline, status);
+                              }).toList(),
+                            ),
+                          ],
                         ),
-                      ],
                     ],
                   ),
                 ),
               ),
             ],
           ),
+          // Profile popup
           Positioned(
             top: 70,
             right: 12,
@@ -362,72 +287,34 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                       ),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(150),
-                          blurRadius: 10,
-                          offset: const Offset(2, 2),
-                        ),
+                        BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 10, offset: const Offset(2, 2)),
                       ],
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Profile',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
+                        const Text('Profile', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
                         const SizedBox(height: 12),
-                        const CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Colors.teal,
-                          child: Icon(Icons.person, size: 30, color: Colors.white),
-                        ),
+                        const CircleAvatar(radius: 30, backgroundColor: Colors.teal, child: Icon(Icons.person, size: 30, color: Colors.white)),
                         const SizedBox(height: 12),
-                        const Text(
-                          'Marie Fe Tapales',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        const Text('Marie Fe Tapales', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        const Text(
-                          'marie@example.com',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
+                        const Text('marie@example.com', style: TextStyle(color: Colors.white70, fontSize: 12)),
                         const SizedBox(height: 12),
                         InkWell(
                           onTap: () async {
                             _profileController.reverse();
                             await Future.delayed(const Duration(milliseconds: 300));
                             if (!mounted) return;
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const EnergyProfileScreen(),
-                              ),
-                            );
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => const EnergyProfileScreen()));
                           },
-                          child: const Text(
-                            'View Profile',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          child: const Text('View Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         ),
                         const SizedBox(height: 8),
                         ElevatedButton(
                           onPressed: _profileController.reverse,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            minimumSize: const Size.fromHeight(36),
-                          ),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, minimumSize: const Size.fromHeight(36)),
                           child: const Text('Close'),
                         ),
                       ],
@@ -443,10 +330,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         currentIndex: 2,
         onTap: (index, page) {
           if (index != 2) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => page),
-            );
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => page));
           }
         },
       ),
@@ -459,207 +343,257 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[400],
-                  fontWeight: FontWeight.w400)),
+          Text(title, style: TextStyle(fontSize: 16, color: Colors.grey[400], fontWeight: FontWeight.w400)),
           const SizedBox(height: 8),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: 28, fontWeight: FontWeight.w600, color: Colors.white)),
+          Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: Colors.white)),
           const SizedBox(height: 6),
-          Text(change,
-              style: const TextStyle(
-                  fontSize: 14, color: Color(0xFF10b981), fontWeight: FontWeight.w500)),
-        ],
-      ),
-    );
-  }
-
-  Widget breakdownTile(IconData icon, String label, String value, double percent) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.teal,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: Colors.white, size: 22),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.white)),
-                const SizedBox(height: 6),
-                LinearProgressIndicator(
-                  value: percent,
-                  color: const Color(0xFF10b981),
-                  backgroundColor: Colors.grey,
-                  minHeight: 6,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(value,
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(change, style: const TextStyle(fontSize: 14, color: Color(0xFF10b981), fontWeight: FontWeight.w500)),
         ],
       ),
     );
   }
 
   Widget lineChart() {
-    final spots = _getUsageData();
+  final spots = _getUsageData();
 
-    double minX = 0;
-    double maxX = spots.length.toDouble() - 1;
+  // Correct minX and maxX for all ranges
+  double minX = 0;
+  double maxX = 0;
 
-    if (_selectedRange == EnergyRange.monthly) {
-      minX = 1;
-      maxX = spots.length.toDouble();
-    } else if (_selectedRange == EnergyRange.daily) {
+  switch (_selectedRange) {
+    case EnergyRange.daily:
       minX = 0;
       maxX = 23;
-    } else if (_selectedRange == EnergyRange.weekly) {
+      break;
+    case EnergyRange.weekly:
       minX = 0;
-      maxX = 6;
-    }
+      maxX = 6; // last index of week
+      break;
+    case EnergyRange.monthly:
+      minX = 1;
+      maxX = spots.length.toDouble(); // number of days in month
+      break;
+  }
 
-    return LineChart(
-      LineChartData(
-        minX: minX,
-        maxX: maxX,
-        minY: 0,
-        maxY: 50,
-        titlesData: FlTitlesData(
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              interval: 1,
-              getTitlesWidget: (value, _) {
-                if (_selectedRange == EnergyRange.weekly) {
-                  int idx = value.toInt();
-                  if (idx >= 0 && idx < 7) {
-                    return Text(
-                      _weekDays[idx],
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    );
-                  }
-                } else if (_selectedRange == EnergyRange.monthly) {
-                  int day = value.toInt();
-                  if (day >= 1 && day <= spots.length) {
-                    return Text(
-                      day.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 10),
-                    );
-                  }
-                } else {
-                  int hour = value.toInt();
-                  if (hour >= 0 && hour <= 23) {
-                    return Text(
-                      hour.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 10),
-                    );
-                  }
+  return LineChart(
+    LineChartData(
+      minX: minX,
+      maxX: maxX,
+      minY: 0,
+      maxY: 50,
+      titlesData: FlTitlesData(
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            interval: 1,
+            getTitlesWidget: (value, _) {
+              if (_selectedRange == EnergyRange.weekly) {
+                int idx = value.toInt();
+                if (idx >= 0 && idx < 7) {
+                  return Text(_weekDays[idx],
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 12));
                 }
-                return const SizedBox();
-              },
-            ),
-          ),
-        ),
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: true,
-            color: Colors.teal,
-            barWidth: 3,
-            belowBarData: BarAreaData(
-              show: true,
-              color: Colors.teal.withValues(alpha: 0.2),
-            ),
-            dotData: FlDotData(show: true),
-          ),
-        ],
-        lineTouchData: LineTouchData(
-          handleBuiltInTouches: true,
-          touchTooltipData: LineTouchTooltipData(
-            tooltipBgColor: Colors.teal,
-            getTooltipItems: (touchedSpots) {
-              return touchedSpots.map((touchedSpot) {
-                String label = '';
-                switch (_selectedRange) {
-                  case EnergyRange.daily:
-                    label = '${touchedSpot.x.toInt()}:00';
-                    break;
-                  case EnergyRange.weekly:
-                    DateTime date =
-                        _selectedWeekStart.add(Duration(days: touchedSpot.x.toInt()));
-                    label =
-                        '${_weekDays[date.weekday - 1]}, ${_monthNames[date.month - 1]} ${date.day}';
-                    break;
-                  case EnergyRange.monthly:
-                    DateTime date =
-                        DateTime(DateTime.now().year, _selectedMonth, touchedSpot.x.toInt());
-                    label = '${_monthNames[date.month - 1]} ${date.day}';
-                    break;
+              } else if (_selectedRange == EnergyRange.monthly) {
+                int day = value.toInt();
+                if (day >= 1 && day <= spots.length) {
+                  return Text(day.toString(),
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 10));
                 }
-                return LineTooltipItem(label, const TextStyle(color: Colors.white));
-              }).toList();
+              } else {
+                int hour = value.toInt();
+                if (hour >= 0 && hour <= 23) {
+                  return Text(hour.toString(),
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 10));
+                }
+              }
+              return const SizedBox();
             },
           ),
-          touchCallback: (event, response) {
-            if (!event.isInterestedForInteractions ||
-                response == null ||
-                response.lineBarSpots == null) return;
-
-            setState(() {
-              final spot = response.lineBarSpots!.first;
-              if (_selectedRange == EnergyRange.monthly) {
-                _selectedDateFromChart =
-                    DateTime(DateTime.now().year, _selectedMonth, spot.x.toInt());
-              } else if (_selectedRange == EnergyRange.weekly) {
-                _selectedDateFromChart =
-                    _selectedWeekStart.add(Duration(days: spot.x.toInt()));
-              } else {
-                _selectedDateFromChart = DateTime(
-                    _selectedDate.year, _selectedDate.month, _selectedDate.day, spot.x.toInt());
+        ),
+      ),
+      lineBarsData: [
+        LineChartBarData(
+          spots: spots,
+          isCurved: true,
+          color: Colors.teal,
+          barWidth: 3,
+          belowBarData: BarAreaData(
+            show: true,
+            color: Colors.teal.withOpacity(0.2),
+          ),
+          dotData: FlDotData(show: true),
+        ),
+      ],
+      lineTouchData: LineTouchData(
+        handleBuiltInTouches: true,
+        touchTooltipData: LineTouchTooltipData(
+          tooltipBgColor: Colors.teal,
+          getTooltipItems: (touchedSpots) {
+            return touchedSpots.map((touchedSpot) {
+              String label = '';
+              switch (_selectedRange) {
+                case EnergyRange.daily:
+                  label = '${touchedSpot.x.toInt()}:00';
+                  break;
+                case EnergyRange.weekly:
+                  DateTime date =
+                      _selectedWeekStart.add(Duration(days: touchedSpot.x.toInt()));
+                  label =
+                      '${_weekDays[date.weekday - 1]}, ${_monthNames[date.month - 1]} ${date.day}';
+                  break;
+                case EnergyRange.monthly:
+                  DateTime date =
+                      DateTime(DateTime.now().year, _selectedMonth, touchedSpot.x.toInt());
+                  label = '${_monthNames[date.month - 1]} ${date.day}';
+                  break;
               }
-            });
+              return LineTooltipItem(label, const TextStyle(color: Colors.white));
+            }).toList();
           },
         ),
+        touchCallback: (event, response) {
+          if (!event.isInterestedForInteractions ||
+              response == null ||
+              response.lineBarSpots == null) return;
+
+          setState(() {
+            final spot = response.lineBarSpots!.first;
+            if (_selectedRange == EnergyRange.monthly) {
+              _selectedDateFromChart =
+                  DateTime(DateTime.now().year, _selectedMonth, spot.x.toInt());
+            } else if (_selectedRange == EnergyRange.weekly) {
+              _selectedDateFromChart =
+                  _selectedWeekStart.add(Duration(days: spot.x.toInt()));
+            } else {
+              _selectedDateFromChart = DateTime(
+                  _selectedDate.year, _selectedDate.month, _selectedDate.day, spot.x.toInt());
+            }
+          });
+        },
+      ),
+    ),
+  );
+}
+
+  Widget breakdownTile(IconData icon, String label, String value, double percent, bool isOnline, String status) {
+    double baseUsage = double.parse(value.replaceAll(' kWh', ''));
+    double ratePerKwh = 11.50;
+    double dailyCost = baseUsage * ratePerKwh;
+    double weeklyCost = dailyCost * 7;
+    double monthlyCost = dailyCost * 30;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+        border: Border.all(color: isOnline ? Colors.teal.withOpacity(0.3) : Colors.grey.withOpacity(0.3)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 6))],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: isOnline ? Colors.teal : Colors.grey[700],
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(icon, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Container(width: 8, height: 8, decoration: BoxDecoration(color: isOnline ? Colors.green : Colors.red, shape: BoxShape.circle)),
+                        const SizedBox(width: 6),
+                        Text(status, style: TextStyle(color: isOnline ? Colors.green[300] : Colors.red[300], fontSize: 12, fontWeight: FontWeight.w500)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.teal.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.teal.withOpacity(0.3)),
+                ),
+                child: Text(value, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.teal, fontSize: 14)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Text('Usage Progress', style: TextStyle(color: Colors.grey[400], fontSize: 12, fontWeight: FontWeight.w500)),
+                Text('${(percent * 100).toStringAsFixed(1)}%', style: TextStyle(color: Colors.grey[400], fontSize: 12, fontWeight: FontWeight.w500)),
+              ]),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(value: percent, color: Colors.teal, backgroundColor: Colors.grey[700], minHeight: 8),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: Colors.black.withOpacity(0.2), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey[800]!)),
+            child: Column(
+              children: [
+                Text('Cost Breakdown', style: TextStyle(color: Colors.grey[300], fontSize: 14, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _costItem('Daily', '₱${dailyCost.toStringAsFixed(2)}', '${baseUsage.toStringAsFixed(1)} kWh'),
+                    _verticalDivider(),
+                    _costItem('Weekly', '₱${weeklyCost.toStringAsFixed(2)}', '${(baseUsage*7).toStringAsFixed(1)} kWh'),
+                    _verticalDivider(),
+                    _costItem('Monthly', '₱${monthlyCost.toStringAsFixed(2)}', '${(baseUsage*30).toStringAsFixed(1)} kWh'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _costItem(String period, String cost, String kwh) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(period, style: TextStyle(color: Colors.grey[400], fontSize: 11, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 4),
+          Text(cost, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 2),
+          Text(kwh, style: TextStyle(color: Colors.teal[300], fontSize: 10, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+  Widget _verticalDivider() => Container(width: 1, height: 40, color: Colors.grey[700], margin: const EdgeInsets.symmetric(horizontal: 8));
 }

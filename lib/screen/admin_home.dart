@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'connected_devices.dart';
 import 'custom_bottom_nav.dart';
 import 'custom_header.dart';
 import 'energy_chart.dart';
 
 enum EnergyPeriod { daily, weekly, monthly }
-
 
 class HomeScreen extends StatefulWidget {
   final int initialIndex;
@@ -61,18 +59,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // Sidebar controls
   void _closeFeatures() {
     _overlayController.reverse();
     _sidebarController.reverse();
   }
 
-  // Profile dropdown controls
-  
   void _closeProfile() => _profileController.reverse();
-  
 
-  // Navigate from features
   void selectFeature(String featureName, Widget screen) {
     _closeFeatures();
     Future.delayed(const Duration(milliseconds: 300), () {
@@ -108,7 +101,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     _isDarkMode = !_isDarkMode;
                   });
                 },
-               
               ),
 
               // Dashboard Content
@@ -128,9 +120,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       const SizedBox(height: 16),
                       _energyConsumptionChart(),
                       const SizedBox(height: 16),
-                      _connectedDevicesSection(),
-                      const SizedBox(height: 16),
-                      _energyTipsSection(),
+                      _energyTipsSection(), // ✅ Connected Devices removed
                     ],
                   ),
                 ),
@@ -150,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
 
-          // Sidebar slide-in (empty now)
+          // Sidebar slide-in
           SlideTransition(
             position: _slideAnimation,
             child: Align(
@@ -310,153 +300,77 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
- 
- // ---------------------- Energy Consumption Chart ----------------------
-Widget _energyConsumptionChart() {
-  return Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start, // ✅ align left
-      children: const [
-        Text(
-          "Energy Consumption",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+  Widget _energyConsumptionChart() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text(
+            "Energy Consumption",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
           ),
-        ),
-        SizedBox(height: 12), // spacing before chart
-        EnergyConsumptionChart(),
-      ],
-    ),
-  );
-}
-
-  
-  // ---------------------- Helper Widgets ----------------------
- 
-  Widget _connectedDevicesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Connected Devices', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        ...connectedDevices.map((device) => _deviceTile(device.icon, device.name, device.status)),
-      ],
+          SizedBox(height: 12),
+         EnergyChart(),
+        ],
+      ),
     );
   }
 
- Widget _deviceTile(IconData icon, String title, String status) {
-  return Container(
-    padding: const EdgeInsets.all(12),
-    margin: const EdgeInsets.only(bottom: 8),
-    decoration: BoxDecoration(
-      gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(
-      children: [
-        Icon(icon, color: Colors.teal, size: 28),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                status,
-                style: TextStyle(
-                  color: status == 'Active' ? Colors.greenAccent : Colors.redAccent,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-
-Widget _tipTile(IconData icon, String title, String subtitle) {
-  return Container(
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: const Color(0xFF1e293b),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Row(
-      children: [
-        Icon(icon, color: Colors.tealAccent, size: 24),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-
-
- Widget _energyTipsSection() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        'Smart Energy Tips',
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+  // ---------------------- Helper Widgets ----------------------
+  Widget _tipTile(IconData icon, String title, String subtitle) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1e293b),
+        borderRadius: BorderRadius.circular(8),
       ),
-      const SizedBox(height: 12),
-      _tipTile(Icons.battery_charging_full, 'Unplug Chargers',
-          'Unplug devices once fully charged to avoid phantom load.'),
-      const SizedBox(height: 8),
-      _tipTile(Icons.ac_unit, 'Efficient AC Use',
-          'Set air conditioners between 24–25°C for efficiency.'),
-      const SizedBox(height: 8),
-      _tipTile(Icons.lightbulb, 'Switch to LED',
-          'LED bulbs use up to 80% less energy than incandescent bulbs.'),
-      const SizedBox(height: 8),
-      _tipTile(Icons.local_laundry_service, 'Run Full Loads',
-          'Washers and dishwashers are most efficient when fully loaded.'),
-      const SizedBox(height: 8),
-      _tipTile(Icons.power, 'Use Smart Plugs',
-          'Monitor and control appliances remotely with smart plugs.'),
-    ],
-  );
-}
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.tealAccent, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(subtitle, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
+  Widget _energyTipsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Smart Energy Tips', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        _tipTile(Icons.battery_charging_full, 'Unplug Chargers',
+            'Unplug devices once fully charged to avoid phantom load.'),
+        const SizedBox(height: 8),
+        _tipTile(Icons.ac_unit, 'Efficient AC Use', 'Set air conditioners between 24–25°C for efficiency.'),
+        const SizedBox(height: 8),
+        _tipTile(Icons.lightbulb, 'Switch to LED', 'LED bulbs use up to 80% less energy than incandescent bulbs.'),
+        const SizedBox(height: 8),
+        _tipTile(Icons.local_laundry_service, 'Run Full Loads',
+            'Washers and dishwashers are most efficient when fully loaded.'),
+        const SizedBox(height: 8),
+        _tipTile(Icons.power, 'Use Smart Plugs', 'Monitor and control appliances remotely with smart plugs.'),
+      ],
+    );
+  }
 }
