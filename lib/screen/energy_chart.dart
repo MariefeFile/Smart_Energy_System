@@ -53,31 +53,25 @@ class _EnergyChartState extends State<EnergyChart> {
 
   List<FlSpot> _getUsageData() {
     switch (_selectedRange) {
-      case EnergyRange.daily: {
+      case EnergyRange.daily:
         return List.generate(24, (h) => FlSpot(h.toDouble(), 10 + (h % 6) * 3));
-      }
-      case EnergyRange.weekly: {
+      case EnergyRange.weekly:
         return List.generate(7, (d) => FlSpot(d.toDouble(), 20 + (d % 3) * 5));
-      }
-      case EnergyRange.monthly: {
+      case EnergyRange.monthly:
         final daysInMonth = DateTime(DateTime.now().year, _selectedMonth + 1, 0).day;
         return List.generate(daysInMonth, (i) => FlSpot((i + 1).toDouble(), 30 + (i % 5) * 4));
-      }
     }
   }
 
   String _getHeaderText() {
     switch (_selectedRange) {
-      case EnergyRange.daily: {
+      case EnergyRange.daily:
         return '${_monthNames[_selectedDate.month - 1]} ${_selectedDate.day}, ${_selectedDate.year}';
-      }
-      case EnergyRange.weekly: {
+      case EnergyRange.weekly:
         final end = _selectedWeekStart.add(const Duration(days: 6));
         return '${_monthNames[_selectedWeekStart.month - 1]} ${_selectedWeekStart.day} – ${_monthNames[end.month - 1]} ${end.day}, ${end.year}';
-      }
-      case EnergyRange.monthly: {
+      case EnergyRange.monthly:
         return '${_monthNames[_selectedMonth - 1]}, ${DateTime.now().year}';
-      }
     }
   }
 
@@ -90,6 +84,21 @@ class _EnergyChartState extends State<EnergyChart> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Buttons Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              _rangeButton(EnergyRange.daily, 'Daily'),
+              const SizedBox(width: 8),
+              _rangeButton(EnergyRange.weekly, 'Weekly'),
+              const SizedBox(width: 8),
+              _rangeButton(EnergyRange.monthly, 'Monthly'),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // Date Row below buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -109,17 +118,13 @@ class _EnergyChartState extends State<EnergyChart> {
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
-              _rangeButton(EnergyRange.daily, 'Daily'),
-              const SizedBox(width: 8),
-              _rangeButton(EnergyRange.weekly, 'Weekly'),
-              const SizedBox(width: 8),
-              _rangeButton(EnergyRange.monthly, 'Monthly'),
             ],
           ),
+
           const SizedBox(height: 12),
           SizedBox(height: 200, child: lineChart()),
           const SizedBox(height: 24),
+
           if (_selectedDateFromChart != null) ...{
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,18 +186,15 @@ class _EnergyChartState extends State<EnergyChart> {
     double maxX = spots.length.toDouble();
 
     switch (_selectedRange) {
-      case EnergyRange.daily: {
+      case EnergyRange.daily:
         maxX = 23;
         break;
-      }
-      case EnergyRange.weekly: {
+      case EnergyRange.weekly:
         maxX = 6;
         break;
-      }
-      case EnergyRange.monthly: {
+      case EnergyRange.monthly:
         maxX = spots.length.toDouble();
         break;
-      }
     }
 
     return LineChart(
