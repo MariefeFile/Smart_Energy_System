@@ -287,7 +287,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                       ),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 10, offset: const Offset(2, 2)),
+                        BoxShadow(color: Colors.black.withValues(alpha: 0.6), blurRadius: 10, offset: const Offset(2, 2)),
                       ],
                     ),
                     child: Column(
@@ -343,7 +343,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,7 +427,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           barWidth: 3,
           belowBarData: BarAreaData(
             show: true,
-            color: Colors.teal.withOpacity(0.2),
+            color: Colors.teal.withValues(alpha: 0.2),
           ),
           dotData: FlDotData(show: true),
         ),
@@ -496,8 +496,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(colors: [Color(0xFF1e293b), Color(0xFF0f172a)]),
-        border: Border.all(color: isOnline ? Colors.teal.withOpacity(0.3) : Colors.grey.withOpacity(0.3)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 6))],
+        border: Border.all(color: isOnline ? Colors.teal.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.3)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 6))],
       ),
       child: Column(
         children: [
@@ -532,9 +532,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.teal.withOpacity(0.2),
+                  color: Colors.teal.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.teal.withOpacity(0.3)),
+                  border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
                 ),
                 child: Text(value, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.teal, fontSize: 14)),
               ),
@@ -558,7 +558,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.2), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey[800]!)),
+            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey[800]!)),
             child: Column(
               children: [
                 Text('Cost Breakdown', style: TextStyle(color: Colors.grey[300], fontSize: 14, fontWeight: FontWeight.w600)),
